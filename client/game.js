@@ -9,6 +9,8 @@ function Runner(socket, playerId, state) {
   let tileWidth
   let tileHeight
   let selectedTile = null
+  let dispatchingBaseIndex = -1
+  let dispatchingBoatIndex = -1
 
   let commandQueue = []
 
@@ -24,7 +26,7 @@ function Runner(socket, playerId, state) {
     canvasHeight = mapBox.height()
     canvas.prop('width', canvasWidth)
     canvas.prop('height', canvasHeight)
-    draw()
+    drawMap()
   }
 
   function updateGeometry() {
@@ -66,7 +68,7 @@ function Runner(socket, playerId, state) {
     return minCoords
   }
 
-  function draw() {
+  function drawMap() {
     updateGeometry()
     const nx = state.nx
     const ny = state.ny
@@ -113,8 +115,8 @@ function Runner(socket, playerId, state) {
       }
     }
 
-    // Bases
     Object.values(state.players).forEach(function (player) {
+      // Bases
       player.bases.forEach(function (base) {
         const center = tileCenter(base.x, base.y)
         const cx = center.x
@@ -139,6 +141,40 @@ function Runner(socket, playerId, state) {
           ctx.strokeStyle = 'black'
           ctx.stroke()
         }
+
+        // Boats
+        base.boats.forEach(function (boat) {
+
+          function path(x, y) {
+            const center = tileCenter(x, y)
+            const cx = center.x
+            const cy = center.y + 0.03 * tileHeight
+            const sx = 0.3 * tileWidth
+            const sy = 0.15 * tileHeight
+            ctx.beginPath()
+            ctx.moveTo(cx + sx, cy)
+            ctx.lineTo(cx + sx - sy, cy + sy)
+            ctx.lineTo(cx - sx + sy, cy + sy)
+            ctx.lineTo(cx - sx, cy)
+            ctx.closePath()
+          }
+
+          if (typeof boat.lastX === 'number') {
+            path(boat.lastX, boat.lastY)
+            ctx.lineWidth = 2
+            ctx.strokeStyle = player.color
+            ctx.stroke()
+          }
+
+          if (boat.dispatched) {
+            path(boat.x, boat.y)
+            ctx.fillStyle = player.color
+            ctx.fill()
+            ctx.lineWidth = 2
+            ctx.strokeStyle = 'black'
+            ctx.stroke()
+          }
+        })
       })
     })
 
@@ -163,7 +199,10 @@ function Runner(socket, playerId, state) {
       node = $('<div class="game-message">').text('\u2b9e ' + chat.message)
     } else {
       const playerName = state.players[chat.playerId].name || playerId
-      node = $('<div>').text(`${playerName}: ${chat.message}`)
+      node = $('<div>')
+        .append($('<span class="player-name">').text(playerName).css({ color: state.players[chat.playerId].color }))
+        .append(': ')
+        .append(chat.message)
     }
     chatLog.append(node)
     chatLog.prop('scrollTop', chatLog.prop('scrollHeight') - chatLog.height())
@@ -200,7 +239,11 @@ function Runner(socket, playerId, state) {
     $('#year').text(state.year)
     $('#num-fish').text(state.totalFish)
     $('#cash').text(state.players[playerId].cash)
-    draw()
+
+    $('#base-cost').text(state.baseCost)
+    $('#boat-cost').text(state.boatCost)
+
+    drawMap()
     updateControls()
     updateRankings()
   }
@@ -211,28 +254,70 @@ function Runner(socket, playerId, state) {
       return
     }
     const offset = $(this).offset()
-    selectTile(getTileCoords(e.pageX - offset.left, e.clientY - offset.top))
+    const coords = getTileCoords(e.pageX - offset.left, e.clientY - offset.top)
+    if (dispatchingBaseIndex >= 0 && dispatchingBoatIndex >= 0) {
+      dispatchBoat(coords.x, coords.y)
+    } else {
+      selectTile(coords)
+    }
   })
 
   function selectTile(coords) {
     selectedTile = coords
-    draw()
+    dispatchingBaseIndex = -1
+    dispatchingBoatIndex = -1
+    drawMap()
     updateControls()
+  }
+
+  function selectedBaseIndex() {
+    if (!selectedTile) {
+      return -1
+    }
+    const player = this.state.players[playerId]
+    for (let i = 0; i < player.bases.length; i++) {
+      const base = player.bases[i]
+      if (!base.isNew && base.x == selectedTile.x && base.y == selectedTile.y) {
+        return i
+      }
+    }
+    return -1
   }
 
   const tileInfo = $('#tile-info')
   const tileCoords = $('#tile-coords')
   function updateControls() {
+    let tile = null
     if (!selectedTile) {
       tileInfo[0].className = 'tile-none'
     } else {
-      const tile = state.grid[selectedTile.y][selectedTile.x]
+      tile = state.grid[selectedTile.y][selectedTile.x]
       const xName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[selectedTile.x]
       const yName = '' + (selectedTile.y + 1)
       const clazz = tile.clazz
       tileInfo[0].className = `tile-${clazz}`
       tileCoords.text(`Tile ${xName}${yName}: ${clazz}`)
     }
+
+    const baseIndex = selectedBaseIndex()
+    $('#build-base').toggleClass('disabled', !!(state.players[playerId].cash < state.baseCost || !tile || tile.clazz != 'coast' || tile.hasBase || baseIndex >= 0))
+    $('#build-base').toggle(baseIndex < 0)
+    $('#base-controls').toggle(baseIndex >= 0)
+    $('#boats').empty()
+    if (baseIndex >= 0) {
+      const boats = state.players[playerId].bases[baseIndex].boats
+      boats.forEach(function (boat, i) {
+        const node = $('<div>')
+          .append(`Boat ${i + 1}`)
+          .append($('<a class="button dispatch-boat">')
+            .text('Dispatch')
+            .toggleClass('disabled', !!boat.dispatched)
+            .attr('data-base-index', baseIndex)
+            .attr('data-boat-index', i))
+        $('#boats').append(node)
+      })
+    }
+    $('#buy-boat').toggleClass('disabled', state.players[playerId].cash < state.boatCost)
 
     $('#end-turn').toggleClass('disabled', !!state.players[playerId].done)
   }
@@ -242,9 +327,15 @@ function Runner(socket, playerId, state) {
       state.players[playerId].bases.push({
         x: selectedTile.x,
         y: selectedTile.y,
+        boats: [],
         isNew: true
       })
       state.players[playerId].cash -= state.baseCost
+    } else if (command.type == 'dispatchBoat') {
+      const boat = state.players[playerId].bases[command.baseIndex].boats[command.boatIndex]
+      boat.x = command.x
+      boat.y = command.y
+      boat.dispatched = true
     }
   }
 
@@ -255,14 +346,45 @@ function Runner(socket, playerId, state) {
 
   $('#build-base').click(function (e) {
     e.preventDefault()
-    commandQueue.push({
+    if ($(this).hasClass('disabled')) {
+      return
+    }
+    const command = {
       type: 'buildBase',
       x: selectedTile.x,
       y: selectedTile.y
-    })
-    applyCommands()
+    }
+    commandQueue.push(command)
+    applyCommand(command)
     updateAll()
   })
+
+  $(document).on('click', '.dispatch-boat', function (e) {
+    e.preventDefault()
+    if ($(this).hasClass('disabled')) {
+      return
+    }
+    dispatchingBaseIndex = $(this).attr('data-base-index')
+    dispatchingBoatIndex = $(this).attr('data-boat-index')
+  })
+
+  function dispatchBoat(x, y) {
+    if (dispatchingBaseIndex < 0 || dispatchingBoatIndex < 0) {
+      return
+    }
+    const command = {
+      type: 'dispatchBoat',
+      baseIndex: dispatchingBaseIndex,
+      boatIndex: dispatchingBoatIndex,
+      x: x,
+      y: y
+    }
+    dispatchingBaseIndex = -1
+    dispatchingBoatIndex = -1
+    commandQueue.push(command)
+    applyCommand(command)
+    updateAll()
+  }
 
   $('#end-turn').click(function (e) {
     e.preventDefault()

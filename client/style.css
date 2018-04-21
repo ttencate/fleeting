@@ -65,7 +65,7 @@ a {
 
 .button.disabled {
   background-color: #aaa;
-  cursor: inherit;
+  cursor: default;
 }
 
 .much-padded {

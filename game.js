@@ -10,8 +10,11 @@ const PLAYER_COLORS = [
   '#111111',
   '#01FF70',
 ]
-const INITIAL_CASH = 190
+const INITIAL_CASH = 100
 const BASE_COST = 100
+const BOAT_COST = 50
+const BOAT_CAPACITY = 3
+const BOAT_RANGE = 3
 
 module.exports = class Game {
   constructor(id, room) {
@@ -30,6 +33,7 @@ module.exports = class Game {
       ny,
       grid,
       baseCost: BASE_COST,
+      boatCost: BOAT_COST,
       year: 1,
     }
 
@@ -52,10 +56,10 @@ module.exports = class Game {
         color: PLAYER_COLORS[Object.keys(this.state.players).length % PLAYER_COLORS.length],
         cash: INITIAL_CASH,
         bases: [],
-        ships: [],
         commands: [],
         done: false,
       }
+      this.gameMessage(`${playerName} has joined`)
     }
 
     socket.emit('state', this.clientState(playerId))
@@ -88,6 +92,7 @@ module.exports = class Game {
 
   simulate() {
     this.buildBases()
+    this.dispatchBoats()
 
     for (const player of Object.values(this.state.players)) {
       player.commands = []
@@ -145,18 +150,7 @@ module.exports = class Game {
 
   canBuildBaseAt(x, y) {
     const tile = this.state.grid[y][x]
-    if (tile.clazz != 'coast') {
-      return false
-    }
-    for (const playerId in this.state.players) {
-      const player = this.state.players[playerId]
-      for (const base of player.bases) {
-        if (x == base.x && y == base.y) {
-          return false
-        }
-      }
-    }
-    return true
+    return tile.clazz == 'coast' && !tile.hasBase
   }
 
   buildBase(playerId, command) {
@@ -170,10 +164,48 @@ module.exports = class Game {
     }
     this.state.players[playerId].bases.push({
       x: command.x,
-      y: command.y
+      y: command.y,
+      boats: []
     })
+    this.state.grid[command.y][command.x].hasBase = true
     this.state.players[playerId].cash -= this.state.baseCost
     this.gameMessage(`${this.state.players[playerId].name} built a new base`)
+
+    this.buyBoat(playerId, this.state.players[playerId].bases.length - 1, true)
+  }
+
+  buyBoat(playerId, baseIndex, free) {
+    if (!free && this.state.players[playerId].cash < this.state.boatCost) {
+      console.log(`${playerId} does not have enough cash to buy a boat`)
+    }
+    this.state.players[playerId].bases[baseIndex].boats.push({
+      capacity: BOAT_CAPACITY,
+      range: BOAT_RANGE,
+      dispatched: false
+    })
+    if (!free) {
+      this.state.players[playerId].cash -= this.state.boatCost
+    }
+  }
+
+  dispatchBoats() {
+    for (const playerId in this.state.players) {
+      const player = this.state.players[playerId]
+      for (const base of player.bases) {
+        for (const boat of base.boats) {
+          boat.lastX = null
+          boat.lastY = null
+        }
+      }
+      for (const command of player.commands) {
+        if (command.type == 'dispatchBoat') {
+          const boat = player.bases[command.baseIndex].boats[command.boatIndex]
+          boat.lastX = command.x
+          boat.lastY = command.y
+          console.log(boat)
+        }
+      }
+    }
   }
 
   rename(playerId, playerName) {
@@ -230,6 +262,7 @@ module.exports = class Game {
       ny: state.ny,
       grid: state.grid,
       baseCost: state.baseCost,
+      boatCost: state.boatCost,
       totalFish
     }
   }
