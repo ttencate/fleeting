@@ -7,7 +7,7 @@
   <body>
     <main class="rows">
       <div class="status">
-        Number of fish in the ocean: 522
+        Number of fish in the ocean: <span id="num-fish"></span>
       </div>
       <div class="columns flex-grow">
         <div class="rows flex-grow">
@@ -22,8 +22,12 @@
           <div class="rankings">
             Rankings go here
           </div>
-          <div class="chat flex-grow">
-            Chat goes here
+          <div class="chat rows flex-grow">
+            <div id="chat-log" class="chat-log flex-grow padded">
+            </div>
+            <div class="padded">
+              <input placeholder="Type to chat" id="chat-input" class="chat-input">
+            </div>
           </div>
         </div>
       </div>
@@ -33,9 +37,13 @@
     </footer>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="/common.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const gameId = {{ gameId }}
+    </script>
     <script src="/game.js"></script>
-    {% if browser_refresh_url %}
-      <script src="{{ browser_refresh_url }}"></script>
+    {% if browserRefreshUrl %}
+      <script src="{{ browserRefreshUrl }}"></script>
     {% endif %}
   </body>
 </html>
