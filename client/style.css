@@ -7,25 +7,60 @@ html, body {
   padding: 0;
   overflow: hidden;
   font-family: Helvetica, Arial, sans-serif;
-  font-size: 2vw;
-  line-height: 3vw;
+  line-height: 1.5;
   background-color: #224;
 }
 
 main {
-  width: 100vw;
-  height: 56.25vw; /* 16:9 */
+  width: 100rem;
+  height: 56.25rem;
+  margin: 0 auto;
   background-color: #dde;
+  font-size: 2rem;
 }
 
 footer {
+  margin: 2rem 0;
   text-align: center;
   color: #779;
-  font-size: 50%;
+}
+
+h1 {
+  text-align: center;
+  color: #27c;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0 0 5rem;
+}
+
+p {
+  color: #234;
+  text-align: center;
+  margin: 0 0 2rem;
 }
 
 a {
   color: inherit;
+}
+
+.button {
+  display: inline-block;
+  background-color: #27c;
+  color: #fff;
+  height: 5rem;
+  line-height: 5rem;
+  padding: 0 2rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover,
+.button:focus,
+.button:active {
+  background-color: #49e;
+}
+
+.padded {
+  padding: 5rem;
 }
 
 .rows {
@@ -48,8 +83,8 @@ a {
 
 .map {
   background: #fef;
-  width: 80vw;
-  height: 40vw;
+  width: 80rem;
+  height: 40rem;
 }
 
 .controls {
@@ -58,5 +93,5 @@ a {
 
 .chat {
   background: #eff;
-  width: 20vw;
+  width: 20rem;
 }

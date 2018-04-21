@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fleeting: A Game Of Fish</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main class="rows">
+      <div class="status">
+        Number of fish in the ocean: 522
+      </div>
+      <div class="columns flex-grow">
+        <div class="rows flex-grow">
+          <div class="map">
+            Map goes here
+          </div>
+          <div class="controls flex-grow">
+            Controls go here
+          </div>
+        </div>
+        <div class="rows">
+          <div class="rankings">
+            Rankings go here
+          </div>
+          <div class="chat flex-grow">
+            Chat goes here
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      A game by <a href="https://frozenfractal.com">Frozen Fractal</a>
+    </footer>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/common.js"></script>
+    <script src="/game.js"></script>
+    {% if browser_refresh_url %}
+      <script src="{{ browser_refresh_url }}"></script>
+    {% endif %}
+  </body>
+</html>
