@@ -14,6 +14,7 @@ const MAX_FISH_PER_TILE = 9
 const INITIAL_CASH = 100
 const BASE_COST = 100
 const BOAT_COST = 50
+const CASH_PER_FISH = 10
 const BOAT_CAPACITY = 5
 const BOAT_RANGE = 4
 
@@ -36,6 +37,7 @@ module.exports = class Game {
       baseCost: BASE_COST,
       boatCost: BOAT_COST,
       maxFishPerTile: MAX_FISH_PER_TILE,
+      cashPerFish: CASH_PER_FISH,
       year: 1,
     }
 
@@ -191,20 +193,26 @@ module.exports = class Game {
   }
 
   dispatchBoats() {
+    // TODO conflict handling
     for (const playerId in this.state.players) {
       const player = this.state.players[playerId]
       for (const base of player.bases) {
         for (const boat of base.boats) {
           boat.lastX = null
           boat.lastY = null
+          boat.fishCaught = null
         }
       }
       for (const command of player.commands) {
         if (command.type == 'dispatchBoat') {
           const boat = player.bases[command.baseIndex].boats[command.boatIndex]
+          const tile = this.state.grid[command.y][command.x]
+          const fishCaught = Math.min(tile.fish, boat.capacity)
           boat.lastX = command.x
           boat.lastY = command.y
-          console.log(boat)
+          boat.fishCaught = fishCaught
+          tile.fish -= fishCaught
+          player.cash += fishCaught * this.state.cashPerFish
         }
       }
     }
@@ -213,7 +221,7 @@ module.exports = class Game {
   neighbors(x, y) {
     const offsets = (y % 2 == 0 ?
       [[0, -1], [1, 0], [0, 1], [-1, 1], [-1, 0], [-1, -1]] :
-      [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [-1, 0]]);
+      [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [0, -1]]);
     return offsets.map(function (offset) {
       return { x: x + offset[0], y: y + offset[1] }
     })
@@ -269,7 +277,7 @@ module.exports = class Game {
     this.state.players[playerId].bases.forEach((base) => {
       base.boats.forEach((boat) => {
         if (typeof boat.lastX == 'number') {
-          grid[boat.lastY][boat.lastX].fish = this.state.grid[boat.lastY][boat.lastX].fish
+          grid[boat.lastY][boat.lastX].fish = this.state.grid[boat.lastY][boat.lastX].fish + boat.fishCaught
           this.neighbors(boat.lastX, boat.lastY).forEach((coords) => {
             grid[coords.y][coords.x].fish = this.state.grid[coords.y][coords.x].fish
           })
@@ -286,6 +294,7 @@ module.exports = class Game {
       baseCost: state.baseCost,
       boatCost: state.boatCost,
       maxFishPerTile: state.maxFishPerTile,
+      cashPerFish: state.cashPerFish,
       totalFish
     }
   }

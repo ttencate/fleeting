@@ -35,7 +35,7 @@ function newMap(layer) {
       } else {
         const offsets = (y % 2 == 0 ?
           [[0, -1], [1, 0], [0, 1], [-1, 1], [-1, 0], [-1, -1]] :
-          [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [-1, 0]]);
+          [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [0, -1]]);
         let waterCount = 0
         offsets.forEach(function (offset) {
           const xx = (x + offset[0] + nx) % nx

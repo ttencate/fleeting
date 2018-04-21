@@ -169,19 +169,17 @@ function Runner(socket, playerId, state) {
 
         // Boats
         base.boats.forEach(function (boat) {
-
           function path(x, y) {
             const center = tileCenter(x, y)
             const cx = center.x
-            const cy = center.y + 0.03 * tileHeight
-            const sx = 0.3 * tileWidth
+            const cy = center.y + 0.15 * tileHeight
+            const sx = 0.4 * tileWidth
             const sy = 0.15 * tileHeight
             ctx.beginPath()
             ctx.moveTo(cx + sx, cy)
             ctx.lineTo(cx + sx - sy, cy + sy)
             ctx.lineTo(cx - sx + sy, cy + sy)
             ctx.lineTo(cx - sx, cy)
-            ctx.closePath()
           }
 
           if (typeof boat.lastX === 'number') {
@@ -189,10 +187,21 @@ function Runner(socket, playerId, state) {
             ctx.lineWidth = 2
             ctx.strokeStyle = player.color
             ctx.stroke()
+
+            const center = tileCenter(boat.lastX, boat.lastY)
+            ctx.font = 'bold ' + (0.3 * tileHeight) + 'px Montserrat, Arial, sans-serif'
+            ctx.fillStyle = 'white'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillText('-' + boat.fishCaught, center.x + 0.3 * tileWidth, center.y - 0.12 * tileHeight)
+
+            ctx.fillStyle = player.color
+            ctx.fillText('$' + (boat.fishCaught * state.cashPerFish), center.x, center.y + 0.12 * tileHeight)
           }
 
           if (boat.dispatched) {
             path(boat.x, boat.y)
+            ctx.closePath()
             ctx.fillStyle = player.color
             ctx.fill()
             ctx.lineWidth = 2
