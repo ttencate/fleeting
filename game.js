@@ -1,52 +1,179 @@
 const map = require('./map')
 
+const PLAYER_COLORS = [
+  '#FF4136',
+  '#FFDC00',
+  '#B10DC9',
+  '#001f3f',
+  '#FF851B',
+  '#AAAAAA',
+  '#111111',
+  '#01FF70',
+]
+const INITIAL_CASH = 190
+const BASE_COST = 100
+
 module.exports = class Game {
   constructor(id, room) {
     this.id = id
     this.room = room
 
-    const nx = map.world.nx
-    const ny = map.world.ny
-    const grid = []
-    for (let y = 0; y < ny; y++) {
-      const row = []
-      for (let x = 0; x < nx; x++) {
-        const type = map.tileTypes[map.world.data[y * nx + x]] || 'water'
-        row.push({
-          type,
-          fish: type == 'water' ? Math.floor(10 * Math.random()) : 0
-        })
-      }
-      grid.push(row)
-    }
+    const m = map.newWorld()
+    const nx = m.nx
+    const ny = m.ny
+    const grid = m.grid
 
     this.state = {
       chats: [],
       players: {},
       nx,
       ny,
-      grid
+      grid,
+      baseCost: BASE_COST,
+      year: 1,
     }
 
     this.sockets = {}
+
+    this.gameMessage('Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!')
   }
 
   join(playerId, playerName, socket) {
-    this.state.players[playerId] = {
-      id: playerId,
-      name: playerName
-    }
-
     this.sockets[playerId] = socket
 
     socket.on('chat', (message) => this.chat(playerId, message))
+    socket.on('commands', (commands) => this.commands(playerId, commands))
     socket.on('disconnect', () => this.disconnect(playerId, socket))
+
+    if (!this.state.players[playerId]) {
+      this.state.players[playerId] = {
+        id: playerId,
+        name: playerName,
+        color: PLAYER_COLORS[Object.keys(this.state.players).length % PLAYER_COLORS.length],
+        cash: INITIAL_CASH,
+        bases: [],
+        ships: [],
+        commands: [],
+        done: false,
+      }
+    }
+
     socket.emit('state', this.clientState(playerId))
     this.state.chats.forEach((chat) => {
       socket.emit('chat', chat)
     })
 
     this.sendState()
+  }
+
+  commands(playerId, commands) {
+    this.state.players[playerId].commands = commands
+    this.state.players[playerId].done = true
+
+    if (this.allDone()) {
+      this.simulate()
+    }
+
+    this.sendState()
+  }
+
+  allDone() {
+    for (const player of Object.values(this.state.players)) {
+      if (!player.done) {
+        return false
+      }
+    }
+    return true
+  }
+
+  simulate() {
+    this.buildBases()
+
+    for (const player of Object.values(this.state.players)) {
+      player.commands = []
+      player.done = false
+    }
+
+    this.state.year++
+    this.gameMessage(`Year ${this.state.year} has begun`)
+  }
+
+  buildBases() {
+    const newBases = {}
+    for (const playerId in this.state.players) {
+      const player = this.state.players[playerId]
+      for (const command of player.commands) {
+        if (command.type == 'buildBase') {
+          const key = `${command.x},${command.y}`
+          newBases[key] = newBases[key] || []
+          newBases[key].push({ playerId: player.id, command })
+        }
+      }
+    }
+    // Build uncontested bases
+    for (let key in newBases) {
+      if (newBases[key].length == 1) {
+        const b = newBases[key][0]
+        this.buildBase(b.playerId, b.command)
+      }
+    }
+    // Handle conflicts
+    for (let key in newBases) {
+      if (newBases[key].length == 1) {
+        continue
+      }
+      const bs = newBases[key]
+      const players = []
+      for (let b of bs) {
+        players.push(this.state.players[b.playerId].name)
+      }
+      this.gameMessage(`${players.join(' and ')} built bases on the same spot; these were placed randomly instead`)
+      for (let b of bs) {
+        for (var i = 0; i < 100; i++) {
+          const x = Math.floor(this.state.nx * Math.random())
+          const y = Math.floor(this.state.ny * Math.random())
+          if (this.canBuildBaseAt(x, y)) {
+            b.command.x = x
+            b.command.y = y
+            break
+          }
+        }
+        this.buildBase(b.playerId, b.command)
+      }
+    }
+  }
+
+  canBuildBaseAt(x, y) {
+    const tile = this.state.grid[y][x]
+    if (tile.clazz != 'coast') {
+      return false
+    }
+    for (const playerId in this.state.players) {
+      const player = this.state.players[playerId]
+      for (const base of player.bases) {
+        if (x == base.x && y == base.y) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
+  buildBase(playerId, command) {
+    if (this.state.players[playerId].cash < this.state.baseCost) {
+      console.log(`${playerId} does not have enough cash to build a base`)
+      return
+    }
+    if (!this.canBuildBaseAt(command.x, command.y)) {
+      console.log(`Cannot build base at ${JSON.stringify(command)}`)
+      return
+    }
+    this.state.players[playerId].bases.push({
+      x: command.x,
+      y: command.y
+    })
+    this.state.players[playerId].cash -= this.state.baseCost
+    this.gameMessage(`${this.state.players[playerId].name} built a new base`)
   }
 
   rename(playerId, playerName) {
@@ -61,12 +188,22 @@ module.exports = class Game {
   }
 
   chat(playerId, message) {
-    const chat = { playerId, message }
+    this.addChat({ playerId, message })
+  }
+
+  gameMessage(message) {
+    this.addChat({ game: true, message })
+  }
+
+  addChat(chat) {
     this.state.chats.push(chat)
     while (this.state.chats.length > 100) {
       this.state.chats.shift()
     }
-    this.room.emit('chat', chat)
+    for (const playerId in this.sockets) {
+      console.log('Sending chat to', playerId)
+      this.sockets[playerId].emit('chat', chat)
+    }
   }
 
   sendState() {
@@ -84,11 +221,15 @@ module.exports = class Game {
         totalFish += state.grid[y][x].fish
       }
     }
+    // TODO scrub fish
+    // TODO scrub commands
     return {
       players: state.players,
+      year: state.year,
       nx: state.nx,
       ny: state.ny,
       grid: state.grid,
+      baseCost: state.baseCost,
       totalFish
     }
   }

@@ -2,23 +2,50 @@
 <html>
   <head>
     <title>Fleeting: A Game Of Fish</title>
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,600">
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
     <main class="rows">
       <div class="status padded">
-        Number of fish in the ocean: <span id="num-fish"></span>
+        <div class="columns">
+          <div class="left">
+            Year <strong id="year"></strong>
+          </div>
+          <div class="center flex-grow">
+            Number of fish in the ocean: <strong id="num-fish"></strong>
+          </div>
+          <div class="right">
+            Cash: <strong>$<span id="cash"></span></strong>
+          </div>
+        </div>
       </div>
       <div class="columns flex-grow">
-        <div class="rows flex-grow">
+        <div class="rows">
           <div id="map-box" class="mapbox">
             <canvas id="map"></canvas>
           </div>
-          <div class="controls flex-grow padded">
-            Controls go here
+          <div class="controls flex-grow">
+            <div class="columns">
+              <div class="flex-grow padded">
+                <div id="tile-info" class="tile-none">
+                  <div class="cloaked none-controls">
+                    Click a tile to select it
+                  </div>
+                  <div id="tile-coords" class="tile-coords">
+                  </div>
+                  <div class="cloaked coast-controls">
+                    <a id="build-base" class="button">Build base ($100)</a>
+                  </div>
+                </div>
+              </div>
+              <div class="padded">
+                <a id="end-turn" class="button">End turn</a>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="rows">
+        <div class="rows flex-grow">
           <div id="rankings" class="rankings padded">
           </div>
           <div class="chat rows flex-grow">
