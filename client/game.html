@@ -6,21 +6,20 @@
   </head>
   <body>
     <main class="rows">
-      <div class="status">
+      <div class="status padded">
         Number of fish in the ocean: <span id="num-fish"></span>
       </div>
       <div class="columns flex-grow">
         <div class="rows flex-grow">
-          <div class="map">
-            Map goes here
+          <div id="map-box" class="mapbox">
+            <canvas id="map"></canvas>
           </div>
-          <div class="controls flex-grow">
+          <div class="controls flex-grow padded">
             Controls go here
           </div>
         </div>
         <div class="rows">
-          <div class="rankings">
-            Rankings go here
+          <div id="rankings" class="rankings padded">
           </div>
           <div class="chat rows flex-grow">
             <div id="chat-log" class="chat-log flex-grow padded">

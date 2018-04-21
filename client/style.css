@@ -86,14 +86,19 @@ a {
   background: #fff;
 }
 
-.map {
-  background: #fef;
+.mapbox {
+  background: #fff;
   width: 80rem;
   height: 40rem;
 }
 
 .controls {
   background: #ffe;
+}
+
+#map {
+  display: block;
+  background-color: #fff;
 }
 
 .chat {

@@ -20,28 +20,58 @@ module.exports = class Game {
 
     this.state = {
       chats: [],
+      players: {},
       nx,
       ny,
       grid
     }
+
+    this.sockets = {}
   }
 
-  connect(playerId, socket) {
+  join(playerId, playerName, socket) {
+    this.state.players[playerId] = {
+      id: playerId,
+      name: playerName
+    }
+
+    this.sockets[playerId] = socket
+
     socket.on('chat', (message) => this.chat(playerId, message))
     socket.on('disconnect', () => this.disconnect(playerId, socket))
     socket.emit('state', this.clientState(playerId))
-    for (const chat of this.state.chats) {
+    this.state.chats.forEach((chat) => {
       socket.emit('chat', chat)
+    })
+
+    this.sendState()
+  }
+
+  rename(playerId, playerName) {
+    const player = this.state.players[playerId]
+    if (!player) {
+      console.log('Player not in game: ', playerId)
+      return
     }
+    console.log(`Renaming ${player.name} to ${playerName}`)
+    player.name = playerName
+    this.sendState()
   }
 
   chat(playerId, message) {
     const chat = { playerId, message }
-    this.chats.push(chat)
-    while (this.chats.length > 100) {
-      this.chats.shift()
+    this.state.chats.push(chat)
+    while (this.state.chats.length > 100) {
+      this.state.chats.shift()
     }
     this.room.emit('chat', chat)
+  }
+
+  sendState() {
+    for (const playerId in this.sockets) {
+      console.log('Sending state to', playerId)
+      this.sockets[playerId].emit('state', this.clientState(playerId))
+    }
   }
 
   clientState(playerId) {
@@ -53,6 +83,7 @@ module.exports = class Game {
       }
     }
     return {
+      players: state.players,
       nx: state.nx,
       ny: state.ny,
       grid: state.grid,
@@ -61,5 +92,6 @@ module.exports = class Game {
   }
 
   disconnect(playerId, socket) {
+    delete this.sockets[playerId]
   }
 }

@@ -49,13 +49,20 @@ app.get('/style.css', function (req, res) {
 
 io.on('connection', function (socket) {
   console.log('connect:', socket.id)
-  socket.on('hello', function (gameId, playerId) {
-    if (!games[gameId]) {
-      games[gameId] = new Game(gameId, io.to(gameId))
-    }
-    const game = games[gameId]
-    socket.join(gameId)
-    game.connect(playerId, socket)
+  socket.on('hello', function (playerId, playerName) {
+    socket.on('join', function (gameId) {
+      if (!games[gameId]) {
+        games[gameId] = new Game(gameId, io.to(gameId))
+      }
+      const game = games[gameId]
+      socket.join(gameId)
+      game.join(playerId, playerName, socket)
+
+      socket.on('rename', function (newName) {
+        playerName = newName
+        game.rename(playerId, newName)
+      })
+    })
   })
   socket.on('disconnect', function () {
     console.log('disconnect:', socket.id)
