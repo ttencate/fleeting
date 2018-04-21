@@ -115,6 +115,31 @@ function Runner(socket, playerId, state) {
       }
     }
 
+    // Selection highlight and border
+    if (selectedTile) {
+      ctx.lineWidth = 6
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'
+      path(tileCenter(selectedTile.x, selectedTile.y))
+      ctx.stroke()
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+      ctx.fill()
+    }
+
+    // Fish counts
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    for (let y = 0; y < ny; y++) {
+      for (let x = 0; x < nx; x++) {
+        const tile = grid[y][x]
+        if (typeof tile.fish == 'number' && tile.clazz == 'water') {
+          const center = tileCenter(x, y)
+          ctx.font = 'bold ' + (0.8 * tileHeight * (0.4 + 0.6 * tile.fish / state.maxFishPerTile)) + 'px Montserrat, Arial, sans-serif'
+          ctx.fillText(tile.fish, center.x, center.y + 0.01 * tileHeight)
+        }
+      }
+    }
+
     Object.values(state.players).forEach(function (player) {
       // Bases
       player.bases.forEach(function (base) {
@@ -177,16 +202,6 @@ function Runner(socket, playerId, state) {
         })
       })
     })
-
-    // Selection highlight and border
-    if (selectedTile) {
-      ctx.lineWidth = 6
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'
-      path(tileCenter(selectedTile.x, selectedTile.y))
-      ctx.stroke()
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-      ctx.fill()
-    }
   }
 
   $(window).on('resize', onResize)

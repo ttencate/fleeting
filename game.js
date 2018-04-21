@@ -10,11 +10,12 @@ const PLAYER_COLORS = [
   '#111111',
   '#01FF70',
 ]
+const MAX_FISH_PER_TILE = 9
 const INITIAL_CASH = 100
 const BASE_COST = 100
 const BOAT_COST = 50
-const BOAT_CAPACITY = 3
-const BOAT_RANGE = 3
+const BOAT_CAPACITY = 5
+const BOAT_RANGE = 4
 
 module.exports = class Game {
   constructor(id, room) {
@@ -34,6 +35,7 @@ module.exports = class Game {
       grid,
       baseCost: BASE_COST,
       boatCost: BOAT_COST,
+      maxFishPerTile: MAX_FISH_PER_TILE,
       year: 1,
     }
 
@@ -208,6 +210,15 @@ module.exports = class Game {
     }
   }
 
+  neighbors(x, y) {
+    const offsets = (y % 2 == 0 ?
+      [[0, -1], [1, 0], [0, 1], [-1, 1], [-1, 0], [-1, -1]] :
+      [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [-1, 0]]);
+    return offsets.map(function (offset) {
+      return { x: x + offset[0], y: y + offset[1] }
+    })
+  }
+
   rename(playerId, playerName) {
     const player = this.state.players[playerId]
     if (!player) {
@@ -248,21 +259,33 @@ module.exports = class Game {
   clientState(playerId) {
     const state = this.state
     let totalFish = 0
+    const grid = JSON.parse(JSON.stringify(state.grid))
     for (var y = 0; y < state.ny; y++) {
       for (var x = 0; x < state.nx; x++) {
-        totalFish += state.grid[y][x].fish
+        totalFish += grid[y][x].fish
+        grid[y][x].fish = null
       }
     }
-    // TODO scrub fish
+    this.state.players[playerId].bases.forEach((base) => {
+      base.boats.forEach((boat) => {
+        if (typeof boat.lastX == 'number') {
+          grid[boat.lastY][boat.lastX].fish = this.state.grid[boat.lastY][boat.lastX].fish
+          this.neighbors(boat.lastX, boat.lastY).forEach((coords) => {
+            grid[coords.y][coords.x].fish = this.state.grid[coords.y][coords.x].fish
+          })
+        }
+      })
+    })
     // TODO scrub commands
     return {
       players: state.players,
       year: state.year,
       nx: state.nx,
       ny: state.ny,
-      grid: state.grid,
+      grid: grid,
       baseCost: state.baseCost,
       boatCost: state.boatCost,
+      maxFishPerTile: state.maxFishPerTile,
       totalFish
     }
   }
