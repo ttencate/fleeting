@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.4" orientation="hexagonal" renderorder="right-down" width="20" height="13" tilewidth="32" tileheight="32" infinite="0" hexsidelength="18" staggeraxis="y" staggerindex="odd" nextobjectid="2">
+ <tileset firstgid="1" name="world" tilewidth="640" tileheight="320" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="640" height="320" source="world_resized.jpg"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="2" name="tiles" tilewidth="32" tileheight="32" tilecount="4" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="32" height="32" source="ice.png"/>
+  </tile>
+  <tile id="1">
+   <image width="32" height="32" source="land.png"/>
+  </tile>
+  <tile id="2">
+   <image width="32" height="32" source="sea.png"/>
+  </tile>
+  <tile id="3">
+   <image width="32" height="32" source="desert.png"/>
+  </tile>
+ </tileset>
+ <objectgroup name="Object Layer 1">
+  <object id="1" gid="1" x="1.16667" y="337.5" width="654.667" height="337.333"/>
+ </objectgroup>
+ <layer name="Tile Layer 1" width="20" height="13">
+  <data encoding="csv">
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+3,3,3,3,3,0,0,0,0,0,3,3,3,3,3,3,3,3,3,0,
+0,0,3,3,3,3,0,0,0,0,3,3,3,3,3,3,3,3,0,0,
+0,0,3,3,3,0,0,0,0,0,0,3,3,5,5,5,3,0,3,0,
+0,0,0,5,0,0,0,0,0,5,5,5,0,5,5,5,3,0,3,0,
+0,0,0,3,0,0,0,0,5,5,5,5,0,0,3,0,3,0,0,0,
+0,0,0,0,0,3,3,0,0,3,3,3,3,0,0,0,0,0,0,0,
+0,0,0,0,3,3,3,0,0,0,3,3,0,3,0,0,0,5,3,0,
+0,0,0,0,0,3,3,0,0,0,0,3,0,3,0,0,0,5,3,0,
+0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+</data>
+ </layer>
+</map>

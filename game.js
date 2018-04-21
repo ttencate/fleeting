@@ -1,18 +1,20 @@
+const map = require('./map')
+
 module.exports = class Game {
   constructor(id, room) {
     this.id = id
     this.room = room
 
-    const nx = 20
-    const ny = 10
+    const nx = map.world.nx
+    const ny = map.world.ny
     const grid = []
     for (let y = 0; y < ny; y++) {
       const row = []
       for (let x = 0; x < nx; x++) {
-        const water = Math.random() > 0.3
+        const type = map.tileTypes[map.world.data[y * nx + x]] || 'water'
         row.push({
-          water,
-          fish: water ? Math.floor(10 * Math.random()) : 0
+          type,
+          fish: type == 'water' ? Math.floor(10 * Math.random()) : 0
         })
       }
       grid.push(row)

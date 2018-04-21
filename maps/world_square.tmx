@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.4" orientation="orthogonal" renderorder="right-down" width="20" height="10" tilewidth="32" tileheight="32" infinite="0" nextobjectid="15">
+ <tileset firstgid="1" name="world" tilewidth="640" tileheight="320" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="1">
+   <image width="640" height="320" source="world_resized.jpg"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="3" name="tiles" tilewidth="32" tileheight="32" tilecount="3" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="32" height="32" source="ice.png"/>
+  </tile>
+  <tile id="1">
+   <image width="32" height="32" source="land.png"/>
+  </tile>
+  <tile id="2">
+   <image width="32" height="32" source="sea.png"/>
+  </tile>
+ </tileset>
+ <objectgroup name="Object Layer 1">
+  <object id="14" gid="2" x="0" y="320" width="640" height="320"/>
+ </objectgroup>
+ <layer name="Tile Layer 1" width="20" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjZmBgYKYiBgEWLJgBicalBpc+XHpIMQsXwCeHzy/E6MFmBrq9pJjHgoVPjH5S3EjIbnzmEStGibsJAWqmZRAGAJbuAW0=
+  </data>
+ </layer>
+</map>
