@@ -392,8 +392,21 @@ function Runner(socket, playerId, state) {
     dispatchingBoatIndex = $(this).attr('data-boat-index')
   })
 
-  function dispatchBoat(x, y) {
+  function canDispatchBoat(x, y) {
     if (dispatchingBaseIndex < 0 || dispatchingBoatIndex < 0) {
+      return false
+    }
+    if (state.grid[y][x].clazz != 'water') {
+      return false
+    }
+    return true
+  }
+
+  function dispatchBoat(x, y) {
+    if (!canDispatchBoat(x, y)) {
+      dispatchingBaseIndex = -1
+      dispatchingBoatIndex = -1
+      updateAll()
       return
     }
     const command = {
