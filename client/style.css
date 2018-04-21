@@ -1,0 +1,62 @@
+* {
+  box-sizing: border-box;  
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 2vw;
+  line-height: 3vw;
+  background-color: #224;
+}
+
+main {
+  width: 100vw;
+  height: 56.25vw; /* 16:9 */
+  background-color: #dde;
+}
+
+footer {
+  text-align: center;
+  color: #779;
+  font-size: 50%;
+}
+
+a {
+  color: inherit;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-grow {
+  flex: 1 1 0;
+}
+
+.status {
+  background: #fff;
+}
+
+.map {
+  background: #fef;
+  width: 80vw;
+  height: 40vw;
+}
+
+.controls {
+  background: #ffe;
+}
+
+.chat {
+  background: #eff;
+  width: 20vw;
+}

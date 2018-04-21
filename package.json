@@ -1,0 +1,29 @@
+{
+  "name": "fleeting",
+  "version": "1.0.0",
+  "description": "An online multiplayer turn-based strategy game, made for Ludum Dare 41",
+  "main": "main.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "nunjucks": "^3.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ttencate/fleeting.git"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "fishing"
+  ],
+  "author": "Thomas ten Cate",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ttencate/fleeting/issues"
+  },
+  "homepage": "https://fleeting.frozenfractal.com"
+}
