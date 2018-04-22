@@ -464,7 +464,6 @@ module.exports = class ServerGame extends BaseGame {
           // grid[y][x].prevFish = null
           // grid[y][x].fish = null
         }
-        grid[y][x].prevFish = null
         delete grid[y][x].visible
       }
     }

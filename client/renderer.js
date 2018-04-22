@@ -146,6 +146,8 @@ class Renderer {
       }
     }
 
+    const boatOffsets = {}
+
     Object.values(state.players).forEach((player) => {
       // Bases
       player.bases.forEach((base) => {
@@ -175,10 +177,15 @@ class Renderer {
 
         // Boats
         base.boats.forEach((boat) => {
+          const key = `${boat.lastX},${boat.lastY}`
+          const offset = boatOffsets[key] || 0
+          const ox = 0.05 * offset * this.tileWidth
+          const oy = 0.05 * offset * this.tileHeight
+
           const path = (x, y) => {
             const center = this.tileCenter(x, y)
-            const cx = center.x
-            const cy = center.y + 0.15 * this.tileHeight
+            const cx = center.x + ox
+            const cy = center.y + 0.15 * this.tileHeight + oy
             const sx = 0.4 * this.tileWidth
             const sy = 0.15 * this.tileHeight
             ctx.beginPath()
@@ -198,6 +205,8 @@ class Renderer {
             ctx.stroke()
 
             const center = this.tileCenter(boat.lastX, boat.lastY)
+            center.x += ox
+            center.y += oy
             ctx.font = 'bold ' + (0.3 * this.tileHeight) + 'px Montserrat, Arial, sans-serif'
             ctx.fillStyle = 'white'
             ctx.textAlign = 'center'
@@ -210,9 +219,31 @@ class Renderer {
             ctx.strokeText(cashText, center.x, center.y + 0.25 * this.tileHeight)
             ctx.fillStyle = player.color
             ctx.fillText(cashText, center.x, center.y + 0.25 * this.tileHeight)
-          }
 
+            boatOffsets[key] = offset + 1
+          }
+        })
+      })
+    })
+
+    // Dispatched boats
+    Object.values(state.players).forEach((player) => {
+      player.bases.forEach((base) => {
+        base.boats.forEach((boat) => {
           if (boat.dispatched) {
+            const path = (x, y) => {
+              const center = this.tileCenter(x, y)
+              const cx = center.x
+              const cy = center.y + 0.15 * this.tileHeight
+              const sx = 0.4 * this.tileWidth
+              const sy = 0.15 * this.tileHeight
+              ctx.beginPath()
+              ctx.moveTo(cx + sx, cy)
+              ctx.lineTo(cx + sx - sy, cy + sy)
+              ctx.lineTo(cx - sx + sy, cy + sy)
+              ctx.lineTo(cx - sx, cy)
+              ctx.closePath()
+            }
             path(boat.x, boat.y)
             ctx.lineWidth = 2
             ctx.strokeStyle = player.color
