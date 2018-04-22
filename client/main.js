@@ -81,7 +81,9 @@ function Runner(socket, playerId, initialState) {
   function updateAll() {
     $('#year').text(game.state.year)
     $('#num-fish').text(game.state.totalFish)
+    $('#lose-fish').text(game.state.loseBelowTotalFish)
     $('#cash').text(game.me().cash)
+    $('#win-cash').text(game.state.winCash)
 
     $('#base-cost').text(game.state.baseCost)
     $('#boat-cost').text(game.state.boatCost)
@@ -238,6 +240,7 @@ $(function () {
   socket.on('state', function (state) {
     if (!runner) {
       runner = new Runner(socket, playerId, state)
+      $('.connecting').hide()
     } else {
       runner.setState(state)
     }

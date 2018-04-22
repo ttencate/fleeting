@@ -18,12 +18,12 @@ const BOAT_COST = 5
 const CASH_PER_FISH = 1
 const BOAT_CAPACITY = 5
 const BOAT_RANGE = 3
-const TARGET_CASH_TIMES_PLAYERS = 240
 const SPAWN_COUNT = 2
 const SPAWN_PERCENT = 100
 const MIGRATE_PERCENT = 15
 const DEATH_PERCENT = 30
 const LOSE_BELOW_TOTAL_FISH = 100
+const WIN_CASH_TIMES_PLAYERS = 240
 
 const TIPS = {
   1: 'Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!',
@@ -49,10 +49,6 @@ module.exports = class ServerGame extends BaseGame {
       nx,
       ny,
       grid,
-      baseCost: BASE_COST,
-      boatCost: BOAT_COST,
-      maxFishPerTile: MAX_FISH_PER_TILE,
-      cashPerFish: CASH_PER_FISH,
       year: 0,
       totalFish: null
     })
@@ -180,6 +176,7 @@ module.exports = class ServerGame extends BaseGame {
       }
       this.gameMessage(`${players.join(' and ')} built bases on the same spot; these were placed randomly instead`)
       for (let b of bs) {
+        // TODO give up eventually and NOT build base
         for (var i = 0; i < 100; i++) {
           const x = Math.floor(this.state.nx * Math.random())
           const y = Math.floor(this.state.ny * Math.random())
@@ -195,7 +192,7 @@ module.exports = class ServerGame extends BaseGame {
   }
 
   buildBase(playerId, command) {
-    if (this.state.players[playerId].cash < this.state.baseCost) {
+    if (this.state.players[playerId].cash < BASE_COST) {
       console.log(`${playerId} does not have enough cash to build a base`)
       return
     }
@@ -212,14 +209,14 @@ module.exports = class ServerGame extends BaseGame {
     })
     tile.hasBase = true
     tile.baseOwner = playerId
-    player.cash -= this.state.baseCost
+    player.cash -= BASE_COST
     this.gameMessage(`${player.name} built a new base`)
 
     this.buyBoat(playerId, player.bases.length - 1, true)
   }
 
   buyBoat(playerId, baseIndex, free) {
-    if (!free && this.state.players[playerId].cash < this.state.boatCost) {
+    if (!free && this.state.players[playerId].cash < BOAT_COST) {
       console.log(`${playerId} does not have enough cash to buy a boat`)
     }
     this.state.players[playerId].bases[baseIndex].boats.push({
@@ -228,12 +225,11 @@ module.exports = class ServerGame extends BaseGame {
       dispatched: false
     })
     if (!free) {
-      this.state.players[playerId].cash -= this.state.boatCost
+      this.state.players[playerId].cash -= BOAT_COST
     }
   }
 
   dispatchBoats() {
-    // TODO conflict handling
     for (const playerId in this.state.players) {
       const player = this.state.players[playerId]
       for (const base of player.bases) {
@@ -243,21 +239,49 @@ module.exports = class ServerGame extends BaseGame {
           boat.fishCaught = null
         }
       }
+    }
+
+    const dispatches = {}
+    for (const playerId in this.state.players) {
+      const player = this.state.players[playerId]
       for (const command of player.commands) {
         if (command.type == 'dispatchBoat') {
           if (!this.canDispatchBoat(playerId, command.baseIndex, command.boatIndex, command.x, command.y)) {
             console.log(`${playerId} cannot dispatch boat to ${command.x}, ${command.y}`)
             continue
           }
-          const boat = player.bases[command.baseIndex].boats[command.boatIndex]
-          const tile = this.state.grid[command.y][command.x]
-          const fishCaught = Math.min(tile.fish, boat.capacity)
-          boat.lastX = command.x
-          boat.lastY = command.y
-          boat.fishCaught = fishCaught
-          tile.fish -= fishCaught
-          player.cash += fishCaught * this.state.cashPerFish
+          const key = `${command.x},${command.y}`
+          dispatches[key] = dispatches[key] || []
+          command.playerId = playerId // Just poke it in, commands will be destroyed soon anyway
+          dispatches[key].push(command)
         }
+      }
+    }
+
+    console.log(dispatches)
+    for (const list of Object.values(dispatches)) {
+      let totalCapacity = 0
+      let x
+      let y
+      for (const command of list) {
+        const boat = this.state.players[command.playerId].bases[command.baseIndex].boats[command.boatIndex]
+        totalCapacity += boat.capacity
+        // Same for all commands
+        x = command.x
+        y = command.y
+      }
+
+      const tile = this.state.grid[y][x]
+      const totalFishCaught = Math.min(tile.fish, totalCapacity)
+      tile.fish -= totalFishCaught
+      for (const command of list) {
+        const player = this.state.players[command.playerId]
+        const boat = player.bases[command.baseIndex].boats[command.boatIndex]
+        const fishCaught = Math.floor(totalFishCaught * boat.capacity / totalCapacity)
+        boat.lastX = command.x
+        boat.lastY = command.y
+        boat.fishCaught = fishCaught
+        player.cash += fishCaught * CASH_PER_FISH
       }
     }
   }
@@ -402,12 +426,18 @@ module.exports = class ServerGame extends BaseGame {
       nx: state.nx,
       ny: state.ny,
       grid: grid,
-      baseCost: state.baseCost,
-      boatCost: state.boatCost,
-      maxFishPerTile: state.maxFishPerTile,
-      cashPerFish: state.cashPerFish,
-      totalFish: state.totalFish
+      totalFish: state.totalFish,
+      baseCost: BASE_COST,
+      boatCost: BOAT_COST,
+      maxFishPerTile: MAX_FISH_PER_TILE,
+      cashPerFish: CASH_PER_FISH,
+      loseBelowTotalFish: LOSE_BELOW_TOTAL_FISH,
+      winCash: this.winCash(),
     }
+  }
+
+  winCash() {
+    return Math.round(WIN_CASH_TIMES_PLAYERS / Object.keys(this.state.players).length)
   }
 
   disconnect(playerId, socket) {

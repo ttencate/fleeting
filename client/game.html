@@ -11,13 +11,28 @@
       <div class="status padded">
         <div class="columns">
           <div class="left">
-            Year <strong id="year"></strong>
+            <div class="row flex-grow dense">
+              Year <strong id="year"></strong>
+            </div>
+            <div class="row small">
+              &nbsp;
+            </div>
           </div>
-          <div class="center flex-grow">
-            Number of fish in the ocean: <strong id="num-fish"></strong>
+          <div class="center flex-grow rows">
+            <div class="row flex-grow dense">
+              Number of fish in the ocean: <strong id="num-fish"></strong>
+            </div>
+            <div class="row small">
+              If this gets below <strong id="lose-fish"></strong>, everybody loses
+            </div>
           </div>
           <div class="right">
-            Cash: <strong>$<span id="cash"></span></strong>
+            <div class="row flex-grow dense">
+              Cash: <strong>$<span id="cash"></span></strong>
+            </div>
+            <div class="row small">
+              To win, be the first to reach <strong>$<span id="win-cash"></span></strong>
+            </div>
           </div>
         </div>
       </div>
@@ -66,6 +81,9 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="connecting">
+        <div>Connecting…</div>
       </div>
     </main>
     <footer>
