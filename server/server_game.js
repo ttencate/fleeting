@@ -160,16 +160,19 @@ module.exports = class ServerGame extends BaseGame {
       console.log(`Cannot build base at ${JSON.stringify(command)}`)
       return
     }
-    this.state.players[playerId].bases.push({
+    const player = this.state.players[playerId]
+    const tile = this.state.grid[command.y][command.x]
+    player.bases.push({
       x: command.x,
       y: command.y,
       boats: []
     })
-    this.state.grid[command.y][command.x].hasBase = true
-    this.state.players[playerId].cash -= this.state.baseCost
-    this.gameMessage(`${this.state.players[playerId].name} built a new base`)
+    tile.hasBase = true
+    tile.baseOwner = playerId
+    player.cash -= this.state.baseCost
+    this.gameMessage(`${player.name} built a new base`)
 
-    this.buyBoat(playerId, this.state.players[playerId].bases.length - 1, true)
+    this.buyBoat(playerId, player.bases.length - 1, true)
   }
 
   buyBoat(playerId, baseIndex, free) {

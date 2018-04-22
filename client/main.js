@@ -20,6 +20,13 @@ function Runner(socket, playerId, initialState) {
     renderer.resize(mapBox.width(), mapBox.height())
   }
 
+  function playerNameNode(playerId) {
+    return $('<span class="player-name">')
+      .text(game.getPlayerName(playerId))
+      .css({ color: game.getPlayerColor(playerId) })
+      .toggleClass('my-player-name', playerId == game.playerId)
+  }
+
   $(window).on('resize', onResize)
   onResize()
 
@@ -29,9 +36,8 @@ function Runner(socket, playerId, initialState) {
     if (chat.game) {
       node = $('<div class="game-message">').text('\u2b9e ' + chat.message)
     } else {
-      const playerName = game.getPlayerName(chat.playerId)
       node = $('<div>')
-        .append($('<span class="player-name">').text(playerName).css({ color: game.getPlayerColor(chat.playerId) }))
+        .append(playerNameNode(chat.playerId))
         .append(': ')
         .append(chat.message)
     }
@@ -51,8 +57,8 @@ function Runner(socket, playerId, initialState) {
     for (let player of game.getRankedPlayers()) {
       const ranking = $('<div class="player-ranking">')
       ranking.append($('<span class="player-ranking-done">').text(player.done ? '\u2611' : '\u2610'))
-      ranking.append($('<span class="player-ranking-name player-name">').text(player.name).css({ color: player.color }))
-      if (player.id == playerId) {
+      ranking.append($('<span class="player-ranking-name">').append(playerNameNode(player.id)))
+      if (player.id == game.playerId) {
         ranking.find('.player-name')
           .addClass('my-player-name')
           .append(' ')
@@ -70,7 +76,7 @@ function Runner(socket, playerId, initialState) {
   function updateAll() {
     $('#year').text(game.state.year)
     $('#num-fish').text(game.state.totalFish)
-    $('#cash').text(game.state.players[playerId].cash)
+    $('#cash').text(game.me().cash)
 
     $('#base-cost').text(game.state.baseCost)
     $('#boat-cost').text(game.state.boatCost)
@@ -120,13 +126,20 @@ function Runner(socket, playerId, initialState) {
       tileCoords.text(`Tile ${xName}${yName}: ${clazz}`)
     }
 
+    $('#base-details').empty()
+    if (tile && tile.hasBase) {
+      $('#base-details')
+        .append('Base owned by ')
+        .append(playerNameNode(tile.baseOwner))
+    }
+
     const baseIndex = game.getBaseIndexAt(selectedTile)
     $('#build-base').toggleClass('disabled', !!selectedTile && !game.canBuildBase(game.playerId, selectedTile.x, selectedTile.y))
     $('#build-base').toggle(baseIndex < 0)
     $('#base-controls').toggle(baseIndex >= 0)
     $('#boats').empty()
     if (baseIndex >= 0) {
-      const boats = state.players[playerId].bases[baseIndex].boats
+      const boats = game.me().bases[baseIndex].boats
       boats.forEach(function (boat, i) {
         const node = $('<div>')
           // .append(`Boat ${i + 1}`)
@@ -138,9 +151,9 @@ function Runner(socket, playerId, initialState) {
         $('#boats').append(node)
       })
     }
-    // $('#buy-boat').toggleClass('disabled', state.players[playerId].cash < state.boatCost)
+    // $('#buy-boat').toggleClass('disabled', game.me().cash < state.boatCost)
 
-    $('#end-turn').toggleClass('disabled', !!state.players[playerId].done)
+    $('#end-turn').toggleClass('disabled', !!game.me().done)
   }
 
   $('#build-base').click(function (e) {
@@ -169,11 +182,15 @@ function Runner(socket, playerId, initialState) {
     }
     socket.emit('commands', game.commandQueue)
     game.commandQueue = []
-    state.players[playerId].done = true
+    game.me().done = true
     socket.emit('done')
     updateAll()
   })
 
+  $('#chat-log').click(function (e) {
+    e.preventDefault()
+    $('#chat-input').focus()
+  })
   $('#chat-input').keypress(function (e) {
     if (e.which == 13) {
       socket.emit('chat', $(this).val())
