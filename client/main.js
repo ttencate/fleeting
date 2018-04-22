@@ -49,18 +49,20 @@ function Runner(socket, playerId, initialState) {
     let rankings = $('#rankings')
     rankings.empty()
     for (let player of game.getRankedPlayers()) {
-      const ranking = $('<div>')
-      ranking.append(player.done ? '\u2611 ' : '\u2610 ')
-      ranking.append($('<span class="player-name">').text(player.name).css({ color: player.color }))
+      const ranking = $('<div class="player-ranking">')
+      ranking.append($('<span class="player-ranking-done">').text(player.done ? '\u2611' : '\u2610'))
+      ranking.append($('<span class="player-ranking-name player-name">').text(player.name).css({ color: player.color }))
       if (player.id == playerId) {
-        ranking.find('.player-name').addClass('my-player-name')
-        ranking.append(' ')
-        ranking.append('<a href="#">edit</a>').click(function (e) {
-          askPlayerName()
-          socket.emit('rename', getPlayerName())
-          e.preventDefault()
-        })
+        ranking.find('.player-name')
+          .addClass('my-player-name')
+          .append(' ')
+          .append('<a href="#">edit</a>').click(function (e) {
+            askPlayerName()
+            socket.emit('rename', getPlayerName())
+            e.preventDefault()
+          })
       }
+      ranking.append($('<span class="player-ranking-cash">').text('$' + player.cash))
       rankings.append(ranking)
     }
   }

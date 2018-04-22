@@ -121,6 +121,24 @@ a {
   background-color: #ddd;
 }
 
+.player-ranking {
+  display: flex;
+  flex-direction: row;
+}
+
+.player-ranking-done {
+  flex: 0 0 1.2em;
+}
+
+.player-ranking-name {
+  flex: 1 1 0;
+}
+
+.player-ranking-cash {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
 .player-name {
   text-shadow: 1px 1px 1px black;
 }

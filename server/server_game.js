@@ -140,7 +140,7 @@ module.exports = class ServerGame extends BaseGame {
         for (var i = 0; i < 100; i++) {
           const x = Math.floor(this.state.nx * Math.random())
           const y = Math.floor(this.state.ny * Math.random())
-          if (this.canBuildBase(playerId, x, y)) {
+          if (this.canBuildBase(b.playerId, x, y)) {
             b.command.x = x
             b.command.y = y
             break
