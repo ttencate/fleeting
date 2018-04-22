@@ -26,7 +26,14 @@ const DEATH_PERCENT = 30
 const LOSE_BELOW_TOTAL_FISH = 100
 
 const TIPS = {
-  1: 'Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!'
+  1: 'Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!',
+  2: 'Select your base, then dispatch your fleet to a nearby tile.',
+  4: 'Maybe you can build another base already?',
+  6: 'Pro tip: you can click a base, then right-click to dispatch.',
+  8: 'Each year, fish spawn, migrate and die.',
+  10: `There must be at least ${SPAWN_COUNT} fish in a tile for them to reproduce.`,
+  12: `Each fish has a ${MIGRATE_PERCENT}% chance of migrating to a neighbouring tile.`,
+  14: `Each fish has a ${DEATH_PERCENT}% chance of dying each year.`,
 }
 
 module.exports = class ServerGame extends BaseGame {
