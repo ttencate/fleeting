@@ -181,8 +181,11 @@ class Renderer {
 
           if (typeof boat.lastX === 'number') {
             path(boat.lastX, boat.lastY)
+            ctx.closePath()
+            ctx.fillStyle = player.color
+            ctx.fill()
             ctx.lineWidth = 2
-            ctx.strokeStyle = player.color
+            ctx.strokeStyle = 'black'
             ctx.stroke()
 
             const center = this.tileCenter(boat.lastX, boat.lastY)
@@ -193,16 +196,17 @@ class Renderer {
             ctx.fillText('-' + boat.fishCaught, center.x + 0.3 * this.tileWidth, center.y - 0.12 * this.tileHeight)
 
             ctx.fillStyle = player.color
-            ctx.fillText('$' + (boat.fishCaught * state.cashPerFish), center.x, center.y + 0.12 * this.tileHeight)
+            ctx.save()
+            ctx.shadowBlur = 3
+            ctx.shadowColor = 'black'
+            ctx.fillText('$' + (boat.fishCaught * state.cashPerFish), center.x, center.y + 0.05 * this.tileHeight)
+            ctx.restore()
           }
 
           if (boat.dispatched) {
             path(boat.x, boat.y)
-            ctx.closePath()
-            ctx.fillStyle = player.color
-            ctx.fill()
             ctx.lineWidth = 2
-            ctx.strokeStyle = 'black'
+            ctx.strokeStyle = player.color
             ctx.stroke()
 
             const basePos = this.tileCenter(base.x, base.y)

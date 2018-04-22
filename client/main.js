@@ -189,10 +189,14 @@ function Runner(socket, playerId, initialState) {
     if ($(this).hasClass('disabled')) {
       return
     }
-    setDispatching({
-      baseIndex: parseInt($(this).attr('data-base-index')),
-      boatIndex: parseInt($(this).attr('data-boat-index'))
-    })
+    if (dispatching) {
+      setDispatching(null)
+    } else {
+      setDispatching({
+        baseIndex: parseInt($(this).attr('data-base-index')),
+        boatIndex: parseInt($(this).attr('data-boat-index'))
+      })
+    }
   })
 
   $('#end-turn').click(function (e) {
