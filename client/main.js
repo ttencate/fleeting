@@ -209,7 +209,7 @@ function Runner(socket, playerId, initialState) {
       boats.forEach(function (boat, i) {
         const node = $('<div>')
           // .append(`Boat ${i + 1}`)
-          .append($('<a class="button dispatch-boat">')
+          .append($('<a class="button margin-top dispatch-boat">')
             .text(
               dispatching ? 'Cancel dispatch' :
               boat.dispatched ? 'Change dispatch' : 'Dispatch fleet')

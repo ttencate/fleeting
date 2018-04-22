@@ -106,6 +106,10 @@ ol, ol > li {
   border-radius: 2rem;
 }
 
+.button.margin-top {
+  margin-top: 0.6rem;
+}
+
 .button:hover,
 .button:focus {
   background-color: #03a9f4;
