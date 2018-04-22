@@ -20,12 +20,13 @@ const BOAT_CAPACITY = 5
 const BOAT_RANGE = 4
 
 module.exports = class ServerGame extends BaseGame {
-  constructor(id) {
+  constructor(id, state) {
     const m = map.newWorld()
     const nx = m.nx
     const ny = m.ny
     const grid = m.grid
-    super({
+    super(state || {
+      id,
       chats: [],
       players: {},
       nx,
@@ -38,11 +39,11 @@ module.exports = class ServerGame extends BaseGame {
       year: 1,
     })
 
-    this.id = id
-
     this.sockets = {}
 
-    this.gameMessage('Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!')
+    if (!state) {
+      this.gameMessage('Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!')
+    }
   }
 
   join(playerId, playerName, socket) {
@@ -79,6 +80,9 @@ module.exports = class ServerGame extends BaseGame {
 
     if (this.allDone()) {
       this.simulate()
+      if (this.turnEnded) {
+        this.turnEnded()
+      }
     }
 
     this.sendState()

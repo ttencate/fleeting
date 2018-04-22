@@ -75,7 +75,7 @@
     <script src="/common.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      const gameId = {{ gameId }}
+      const gameId = {{ gameId | safe }}
     </script>
     <script src="/base_game.js"></script>
     <script src="/client_game.js"></script>
