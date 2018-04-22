@@ -1,3 +1,4 @@
+const BaseGame = require('../shared/base_game')
 const map = require('./map')
 
 const PLAYER_COLORS = [
@@ -18,17 +19,13 @@ const CASH_PER_FISH = 10
 const BOAT_CAPACITY = 5
 const BOAT_RANGE = 4
 
-module.exports = class Game {
-  constructor(id, room) {
-    this.id = id
-    this.room = room
-
+module.exports = class ServerGame extends BaseGame {
+  constructor(id) {
     const m = map.newWorld()
     const nx = m.nx
     const ny = m.ny
     const grid = m.grid
-
-    this.state = {
+    super({
       chats: [],
       players: {},
       nx,
@@ -39,7 +36,9 @@ module.exports = class Game {
       maxFishPerTile: MAX_FISH_PER_TILE,
       cashPerFish: CASH_PER_FISH,
       year: 1,
-    }
+    })
+
+    this.id = id
 
     this.sockets = {}
 
@@ -152,11 +151,6 @@ module.exports = class Game {
     }
   }
 
-  canBuildBaseAt(x, y) {
-    const tile = this.state.grid[y][x]
-    return tile.clazz == 'coast' && !tile.hasBase
-  }
-
   buildBase(playerId, command) {
     if (this.state.players[playerId].cash < this.state.baseCost) {
       console.log(`${playerId} does not have enough cash to build a base`)
@@ -216,15 +210,6 @@ module.exports = class Game {
         }
       }
     }
-  }
-
-  neighbors(x, y) {
-    const offsets = (y % 2 == 0 ?
-      [[0, -1], [1, 0], [0, 1], [-1, 1], [-1, 0], [-1, -1]] :
-      [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [0, -1]]);
-    return offsets.map(function (offset) {
-      return { x: x + offset[0], y: y + offset[1] }
-    })
   }
 
   rename(playerId, playerName) {

@@ -4,7 +4,7 @@ const nunjucks = require('nunjucks')
 const path = require('path')
 const socketIo = require('socket.io')
 
-const Game = require('./game')
+const ServerGame = require('./server/server_game')
 
 const host = 'localhost'
 const port = 3000
@@ -52,7 +52,7 @@ io.on('connection', function (socket) {
   socket.on('hello', function (playerId, playerName) {
     socket.on('join', function (gameId) {
       if (!games[gameId]) {
-        games[gameId] = new Game(gameId, io.to(gameId))
+        games[gameId] = new ServerGame(gameId)
       }
       const game = games[gameId]
       socket.join(gameId)
