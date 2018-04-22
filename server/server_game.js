@@ -184,22 +184,27 @@ module.exports = class ServerGame extends BaseGame {
       }
       this.gameMessage('action', `${players.join(' and ')} built bases on the same spot; these were placed randomly instead`)
       for (let b of bs) {
-        // TODO give up eventually and NOT build base
-        for (var i = 0; i < 100; i++) {
+        let found = false
+        for (var i = 0; i < this.state.nx * this.state.ny * 5; i++) {
           const x = Math.floor(this.state.nx * Math.random())
           const y = Math.floor(this.state.ny * Math.random())
           if (this.canBuildBase(b.playerId, x, y)) {
             b.command.x = x
             b.command.y = y
+            found = true
             break
           }
         }
-        this.buildBase(b.playerId, b.command)
+        if (found) {
+          this.buildBase(b.playerId, b.command, false)
+        } else {
+          this.gameMessage('action', `Could not find a free spot for ${b.playerId}'s new base`)
+        }
       }
     }
   }
 
-  buildBase(playerId, command) {
+  buildBase(playerId, command, tell = true) {
     if (this.state.players[playerId].cash < BASE_COST) {
       console.log(`${playerId} does not have enough cash to build a base`)
       return
@@ -218,7 +223,9 @@ module.exports = class ServerGame extends BaseGame {
     tile.hasBase = true
     tile.baseOwner = playerId
     player.cash -= BASE_COST
-    this.gameMessage('action', `${playerId} built a new base`)
+    if (tell) {
+      this.gameMessage('action', `${playerId} built a new base`)
+    }
 
     this.buyBoat(playerId, player.bases.length - 1, true)
   }
