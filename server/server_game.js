@@ -12,12 +12,22 @@ const PLAYER_COLORS = [
   '#01FF70',
 ]
 const MAX_FISH_PER_TILE = 9
-const INITIAL_CASH = 100
-const BASE_COST = 100
-const BOAT_COST = 50
-const CASH_PER_FISH = 10
+const INITIAL_CASH = 10
+const BASE_COST = 10
+const BOAT_COST = 5
+const CASH_PER_FISH = 1
 const BOAT_CAPACITY = 5
-const BOAT_RANGE = 4
+const BOAT_RANGE = 3
+const TARGET_CASH_TIMES_PLAYERS = 240
+const SPAWN_COUNT = 2
+const SPAWN_PERCENT = 100
+const MIGRATE_PERCENT = 15
+const DEATH_PERCENT = 30
+const LOSE_BELOW_TOTAL_FISH = 100
+
+const TIPS = {
+  1: 'Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!'
+}
 
 module.exports = class ServerGame extends BaseGame {
   constructor(id, state) {
@@ -36,13 +46,15 @@ module.exports = class ServerGame extends BaseGame {
       boatCost: BOAT_COST,
       maxFishPerTile: MAX_FISH_PER_TILE,
       cashPerFish: CASH_PER_FISH,
-      year: 1,
+      year: 0,
+      totalFish: null
     })
+    this.updateTotalFish()
 
     this.sockets = {}
 
     if (!state) {
-      this.gameMessage('Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!')
+      this.simulate()
     }
   }
 
@@ -98,6 +110,14 @@ module.exports = class ServerGame extends BaseGame {
   }
 
   simulate() {
+    const state = this.state
+    for (var y = 0; y < state.ny; y++) {
+      for (var x = 0; x < state.nx; x++) {
+        const tile = state.grid[y][x]
+        tile.prevFish = tile.fish
+      }
+    }
+
     this.buildBases()
     this.dispatchBoats()
 
@@ -106,8 +126,20 @@ module.exports = class ServerGame extends BaseGame {
       player.done = false
     }
 
+    this.spawn()
+    this.migrate()
+    this.die()
+    this.updateTotalFish()
+
     this.state.year++
-    this.gameMessage(`Year ${this.state.year} has begun`)
+    this.gameMessage(`Year ${this.state.year} has begun, with ${this.state.totalFish} fish`)
+
+    const tip = TIPS[this.state.year]
+    if (tip) {
+      this.gameMessage(tip)
+    }
+
+    this.sendState()
   }
 
   buildBases() {
@@ -223,6 +255,62 @@ module.exports = class ServerGame extends BaseGame {
     }
   }
 
+  spawn() {
+    for (let y = 0; y < this.state.ny; y++) {
+      for (let x = 0; x < this.state.nx; x++) {
+        const tile = this.state.grid[y][x]
+        if (tile.clazz == 'water') {
+          const spawn = Math.floor(tile.fish / SPAWN_COUNT)
+          for (let i = 0; i < spawn; i++) {
+            if (100 * Math.random() <= SPAWN_PERCENT) {
+              tile.fish = Math.min(tile.fish + 1, MAX_FISH_PER_TILE)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  migrate() {
+    for (let y = 0; y < this.state.ny; y++) {
+      for (let x = 0; x < this.state.nx; x++) {
+        const tile = this.state.grid[y][x]
+        if (tile.clazz == 'water') {
+          for (let i = 0; i < tile.fish; i++) {
+            if (100 * Math.random() <= MIGRATE_PERCENT) {
+              const neigh = this.neighbors(x, y)
+              const toCoords = neigh[Math.floor(6 * Math.random())]
+              if (!toCoords) {
+                continue
+              }
+              const toTile = this.state.grid[toCoords.y][toCoords.x]
+              if (!toTile || toTile.clazz != 'water' || toTile.fish >= MAX_FISH_PER_TILE) {
+                continue
+              }
+              tile.fish -= 1
+              toTile.fish += 1
+            }
+          }
+        }
+      }
+    }
+  }
+
+  die() {
+    for (let y = 0; y < this.state.ny; y++) {
+      for (let x = 0; x < this.state.nx; x++) {
+        const tile = this.state.grid[y][x]
+        if (tile.clazz == 'water') {
+          for (let i = 0; i < tile.fish; i++) {
+            if (100 * Math.random() <= DEATH_PERCENT) {
+              tile.fish -= 1
+            }
+          }
+        }
+      }
+    }
+  }
+
   rename(playerId, playerName) {
     const player = this.state.players[playerId]
     if (!player) {
@@ -253,6 +341,17 @@ module.exports = class ServerGame extends BaseGame {
     }
   }
 
+  updateTotalFish() {
+    const grid = this.state.grid
+    let totalFish = 0
+    for (var y = 0; y < this.state.ny; y++) {
+      for (var x = 0; x < this.state.nx; x++) {
+        totalFish += grid[y][x].fish
+      }
+    }
+    this.state.totalFish = totalFish;
+  }
+
   sendState() {
     for (const playerId in this.sockets) {
       console.log('Sending state to', playerId)
@@ -262,24 +361,26 @@ module.exports = class ServerGame extends BaseGame {
 
   clientState(playerId) {
     const state = this.state
-    let totalFish = 0
     const grid = JSON.parse(JSON.stringify(state.grid))
-    for (var y = 0; y < state.ny; y++) {
-      for (var x = 0; x < state.nx; x++) {
-        totalFish += grid[y][x].fish
-        grid[y][x].fish = null
-      }
-    }
     this.state.players[playerId].bases.forEach((base) => {
       base.boats.forEach((boat) => {
         if (typeof boat.lastX == 'number') {
-          grid[boat.lastY][boat.lastX].fish = this.state.grid[boat.lastY][boat.lastX].fish + boat.fishCaught
+          grid[boat.lastY][boat.lastX].visible = true
           this.neighbors(boat.lastX, boat.lastY).forEach((coords) => {
-            grid[coords.y][coords.x].fish = this.state.grid[coords.y][coords.x].fish
+            grid[coords.y][coords.x].visible = true
           })
         }
       })
     })
+    for (var y = 0; y < this.state.ny; y++) {
+      for (var x = 0; x < this.state.nx; x++) {
+        if (!grid[y][x].visible) {
+          // grid[y][x].prevFish = null
+          grid[y][x].fish = null
+        }
+        delete grid[y][x].visible
+      }
+    }
     // TODO scrub commands
     return {
       players: state.players,
@@ -291,7 +392,7 @@ module.exports = class ServerGame extends BaseGame {
       boatCost: state.boatCost,
       maxFishPerTile: state.maxFishPerTile,
       cashPerFish: state.cashPerFish,
-      totalFish
+      totalFish: state.totalFish
     }
   }
 

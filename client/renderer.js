@@ -129,10 +129,17 @@ class Renderer {
     for (let y = 0; y < ny; y++) {
       for (let x = 0; x < nx; x++) {
         const tile = grid[y][x]
-        if (typeof tile.fish == 'number' && tile.clazz == 'water') {
+        if (tile.clazz != 'water') {
+          continue
+        }
+        const fish = (
+          typeof tile.fish == 'number' ? tile.fish :
+          typeof tile.prevFish == 'number' ? tile.prevFish :
+          null)
+        if (typeof fish == 'number') {
           const center = this.tileCenter(x, y)
-          ctx.font = 'bold ' + (0.8 * this.tileHeight * (0.4 + 0.6 * tile.fish / state.maxFishPerTile)) + 'px Montserrat, Arial, sans-serif'
-          ctx.fillText(tile.fish, center.x, center.y + 0.01 * this.tileHeight)
+          ctx.font = 'bold ' + (0.8 * this.tileHeight * (0.4 + 0.6 * tile.prevFish / state.maxFishPerTile)) + 'px Montserrat, Arial, sans-serif'
+          ctx.fillText(tile.prevFish, center.x, center.y + 0.01 * this.tileHeight)
         }
       }
     }
@@ -199,7 +206,7 @@ class Renderer {
             ctx.save()
             ctx.shadowBlur = 3
             ctx.shadowColor = 'black'
-            ctx.fillText('$' + (boat.fishCaught * state.cashPerFish), center.x, center.y + 0.05 * this.tileHeight)
+            ctx.fillText('$' + (boat.fishCaught * state.cashPerFish), center.x - 0.25 * this.tileWidth, center.y + 0.16 * this.tileHeight)
             ctx.restore()
           }
 

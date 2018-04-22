@@ -20,7 +20,7 @@ function newMap(layer) {
       const type = tileTypes[layer.data[y * nx + x]] || 'water'
       row.push({
         type,
-        fish: type == 'water' ? Math.floor(10 * Math.random()) : 0
+        fish: type == 'water' ? Math.floor(2 + 5 * Math.random()) : 0
       })
     }
     grid.push(row)
