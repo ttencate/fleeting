@@ -132,14 +132,16 @@ class Renderer {
         if (tile.clazz != 'water') {
           continue
         }
-        const fish = (
-          typeof tile.fish == 'number' ? tile.fish :
-          typeof tile.prevFish == 'number' ? tile.prevFish :
-          null)
-        if (typeof fish == 'number') {
+        let fish = null
+        if (typeof tile.fish == 'number') {
+          fish = tile.fish
+        } else if (typeof tile.prevFish == 'number') {
+          fish = tile.prevFish
+        }
+        if (fish !== null) {
           const center = this.tileCenter(x, y)
-          ctx.font = 'bold ' + (0.8 * this.tileHeight * (0.4 + 0.6 * tile.prevFish / state.maxFishPerTile)) + 'px Montserrat, Arial, sans-serif'
-          ctx.fillText(tile.prevFish, center.x, center.y + 0.01 * this.tileHeight)
+          ctx.font = 'bold ' + (0.8 * this.tileHeight * (0.4 + 0.6 * fish / state.maxFishPerTile)) + 'px Montserrat, Arial, sans-serif'
+          ctx.fillText(fish, center.x, center.y + 0.01 * this.tileHeight)
         }
       }
     }
@@ -184,11 +186,11 @@ class Renderer {
             ctx.lineTo(cx + sx - sy, cy + sy)
             ctx.lineTo(cx - sx + sy, cy + sy)
             ctx.lineTo(cx - sx, cy)
+            ctx.closePath()
           }
 
           if (typeof boat.lastX === 'number') {
             path(boat.lastX, boat.lastY)
-            ctx.closePath()
             ctx.fillStyle = player.color
             ctx.fill()
             ctx.lineWidth = 2
@@ -200,14 +202,14 @@ class Renderer {
             ctx.fillStyle = 'white'
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
-            ctx.fillText('-' + boat.fishCaught, center.x + 0.3 * this.tileWidth, center.y - 0.12 * this.tileHeight)
+            ctx.fillText('-' + boat.fishCaught, center.x, center.y - 0.3 * this.tileHeight)
 
+            const cashText = '$' + (boat.fishCaught * state.cashPerFish)
+            ctx.lineWidth = 3
+            ctx.strokeStyle = 'black'
+            ctx.strokeText(cashText, center.x, center.y + 0.25 * this.tileHeight)
             ctx.fillStyle = player.color
-            ctx.save()
-            ctx.shadowBlur = 3
-            ctx.shadowColor = 'black'
-            ctx.fillText('$' + (boat.fishCaught * state.cashPerFish), center.x - 0.25 * this.tileWidth, center.y + 0.16 * this.tileHeight)
-            ctx.restore()
+            ctx.fillText(cashText, center.x, center.y + 0.25 * this.tileHeight)
           }
 
           if (boat.dispatched) {

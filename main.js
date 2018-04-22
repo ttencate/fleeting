@@ -34,8 +34,8 @@ async function main() {
   const games = await store.loadAllGames()
   console.log(`Loaded ${Object.keys(games).length} games from storage`)
 
-  function turnEnded() {
-    store.saveGame(this)
+  function turnEnded(game) {
+    store.saveGame(game)
   }
   for (game of Object.values(games)) {
     game.turnEnded = turnEnded

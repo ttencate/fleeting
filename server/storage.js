@@ -33,8 +33,8 @@ class Storage {
         console.log(`Inserted saved game ${game.state.id} (year ${game.state.year})`)
       } else {
         await this.db.run(
-          'UPDATE games SET state = $state',
-          { $state: jsonState })
+          'UPDATE games SET state = $state WHERE id = $id',
+          { $id: game.state.id, $state: jsonState })
         console.log(`Updated saved game ${game.state.id} (year ${game.state.year})`)
       }
     } catch (ex) {

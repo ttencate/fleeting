@@ -22,12 +22,19 @@ const SPAWN_COUNT = 2
 const SPAWN_PERCENT = 100
 const MIGRATE_PERCENT = 15
 const DEATH_PERCENT = 30
-const LOSE_BELOW_TOTAL_FISH = 100
-const WIN_CASH_TIMES_PLAYERS = 240
+const LOSE_BELOW_TOTAL_FISH = 150
+const WIN_CASH_BY_NUM_PLAYERS = {
+  1: 400,
+  2: 200,
+  3: 150,
+  4: 120,
+  5: 100,
+}
 
 const TIPS = {
   1: 'Select a location on the coast for your first base. If two players select the same location, both will be reassigned randomly!',
   2: 'Select your base, then dispatch your fleet to a nearby tile.',
+  3: `Each fish you catch gives you \$${CASH_PER_FISH} in revenue.`,
   4: 'Maybe you can build another base already?',
   6: 'Pro tip: you can click a base, then right-click to dispatch.',
   8: 'Each year, fish spawn, migrate and die.',
@@ -96,7 +103,7 @@ module.exports = class ServerGame extends BaseGame {
     if (this.allDone()) {
       this.simulate()
       if (this.turnEnded) {
-        this.turnEnded()
+        this.turnEnded(this)
       }
     }
 
@@ -406,8 +413,9 @@ module.exports = class ServerGame extends BaseGame {
       for (var x = 0; x < this.state.nx; x++) {
         if (!grid[y][x].visible) {
           // grid[y][x].prevFish = null
-          grid[y][x].fish = null
+          // grid[y][x].fish = null
         }
+        grid[y][x].prevFish = null
         delete grid[y][x].visible
       }
     }
@@ -436,7 +444,7 @@ module.exports = class ServerGame extends BaseGame {
   }
 
   winCash() {
-    return Math.round(WIN_CASH_TIMES_PLAYERS / Object.keys(this.state.players).length)
+    return WIN_CASH_BY_NUM_PLAYERS[Object.keys(this.state.players).length] || WIN_CASH_BY_NUM_PLAYERS[5]
   }
 
   disconnect(playerId, socket) {
