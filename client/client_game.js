@@ -97,6 +97,20 @@ class ClientGame extends BaseGame {
     return -1
   }
 
+  getUndispatchedBoatIndex(baseIndex) {
+    if (baseIndex < 0) {
+      return -1
+    }
+    const boats = this.me().bases[baseIndex].boats
+    for (let i = 0; i < boats.length; i++) {
+      const boat = boats[i]
+      if (!boat.dispatched) {
+        return i
+      }
+    }
+    return -1
+  }
+
   getRankedPlayers() {
     const players = Object.values(this.state.players)
     players.sort(function (a, b) {

@@ -86,20 +86,37 @@ function Runner(socket, playerId, initialState) {
     updateRankings()
   }
 
-  canvas.click(function (e) {
-    e.preventDefault()
+  // mousedown gets right click, click does not.
+  canvas.mousedown(function (e) {
     const offset = $(this).offset()
     const coords = renderer.getTileCoords(e.pageX - offset.left, e.clientY - offset.top)
 
-    if (dispatchingBaseIndex >= 0 && dispatchingBoatIndex >= 0) {
-      game.dispatchBoat(dispatchingBaseIndex, dispatchingBoatIndex, coords.x, coords.y)
+    if (e.which == 1) { // Left
+      e.preventDefault()
+      if (dispatchingBaseIndex >= 0 && dispatchingBoatIndex >= 0) {
+        game.dispatchBoat(dispatchingBaseIndex, dispatchingBoatIndex, coords.x, coords.y)
+        dispatchingBaseIndex = -1
+        dispatchingBoatIndex = -1
+        updateAll()
+      } else {
+        selectTile(coords)
+      }
+    } else if (e.which == 3) { // Right
+      e.preventDefault()
       dispatchingBaseIndex = -1
       dispatchingBoatIndex = -1
-      updateAll()
-    } else {
-      selectTile(coords)
+      if (selectedTile) {
+        const baseIndex = game.getBaseIndexAt(selectedTile)
+        const boatIndex = game.getUndispatchedBoatIndex(baseIndex)
+        if (baseIndex >= 0 && boatIndex >= 0) {
+          game.dispatchBoat(baseIndex, boatIndex, coords.x, coords.y)
+          updateAll()
+        }
+      }
     }
   })
+
+  canvas.on('contextmenu', function (e) { e.preventDefault() })
 
   function selectTile(coords) {
     selectedTile = coords
@@ -135,7 +152,7 @@ function Runner(socket, playerId, initialState) {
 
     const baseIndex = game.getBaseIndexAt(selectedTile)
     $('#build-base').toggleClass('disabled', !!selectedTile && !game.canBuildBase(game.playerId, selectedTile.x, selectedTile.y))
-    $('#build-base').toggle(baseIndex < 0)
+    $('#build-base').toggle(!!selectedTile && tile.clazz == 'coast' && !tile.hasBase)
     $('#base-controls').toggle(baseIndex >= 0)
     $('#boats').empty()
     if (baseIndex >= 0) {
