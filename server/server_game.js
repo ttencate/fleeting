@@ -388,9 +388,16 @@ module.exports = class ServerGame extends BaseGame {
         delete grid[y][x].visible
       }
     }
-    // TODO scrub commands
+
+    const players = JSON.parse(JSON.stringify(state.players))
+    for (const player of Object.values(players)) {
+      if (player.id != playerId) {
+        player.commands = []
+      }
+    }
+
     return {
-      players: state.players,
+      players,
       year: state.year,
       nx: state.nx,
       ny: state.ny,
