@@ -8,7 +8,7 @@ const ServerGame = require('./server/server_game')
 const storage = require('./server/storage')
 
 const HOST = 'localhost'
-const PORT = 3000
+const PORT = 3001
 const DATABASE_PATH = path.resolve(__dirname, 'data.sqlite')
 
 function renderTemplate(template, context, res) {
