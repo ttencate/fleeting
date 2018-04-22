@@ -220,6 +220,12 @@ function Runner(socket, playerId, initialState) {
     $('#end-turn').toggleClass('disabled', !!game.me().done)
     $('#end-turn')
       .text(game.me().host && game.state.year == 1 ? '\u2713 Start game' : '\u2713 End turn')
+    const shareLink = window.location
+    $('#share-link')
+      .empty()
+      .append($('<a>').attr('href', shareLink).text(shareLink))
+    $('#share-link-box')
+      .toggle(!!game.me().host && game.state.year == 1)
   }
 
   $('#build-base').click(function (e) {
