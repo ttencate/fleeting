@@ -138,7 +138,8 @@ function Runner(socket, playerId, initialState) {
       setDispatching(null)
       if (selectedTile) {
         const baseIndex = game.getBaseIndexAt(selectedTile)
-        const boatIndex = game.getUndispatchedBoatIndex(baseIndex)
+        // Assuming 1 boat per base for now
+        const boatIndex = 0 // game.getUndispatchedBoatIndex(baseIndex)
         if (baseIndex >= 0 && boatIndex >= 0) {
           game.dispatchBoat(baseIndex, boatIndex, coords.x, coords.y)
           updateAll()
@@ -191,8 +192,9 @@ function Runner(socket, playerId, initialState) {
         const node = $('<div>')
           // .append(`Boat ${i + 1}`)
           .append($('<a class="button dispatch-boat">')
-            .text('Dispatch fleet')
-            .toggleClass('disabled', !!boat.dispatched)
+            .text(
+              dispatching ? 'Cancel dispatch' :
+              boat.dispatched ? 'Change dispatch' : 'Dispatch fleet')
             .attr('data-base-index', baseIndex)
             .attr('data-boat-index', i))
         $('#boats').append(node)
@@ -225,6 +227,7 @@ function Runner(socket, playerId, initialState) {
         boatIndex: parseInt($(this).attr('data-boat-index'))
       })
     }
+    updateControls()
   })
 
   $('#end-turn').click(function (e) {

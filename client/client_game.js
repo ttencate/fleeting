@@ -34,13 +34,22 @@ class ClientGame extends BaseGame {
     if (!this.canDispatchBoat(this.playerId, baseIndex, boatIndex, x, y)) {
       return false
     }
-    const command = {
-      type: 'dispatchBoat',
-      baseIndex,
-      boatIndex,
-      x,
-      y
+    let command = null
+    for (const c of this.commandQueue) {
+      if (c.type == 'dispatchBoat' && c.baseIndex == baseIndex && c.boatIndex == boatIndex) {
+        command = c
+        break
+      }
     }
+    if (!command) {
+      command = {
+        type: 'dispatchBoat',
+        baseIndex,
+        boatIndex
+      }
+    }
+    command.x = x
+    command.y = y
     this.commandQueue.push(command)
     this.applyCommand(command)
     return true
