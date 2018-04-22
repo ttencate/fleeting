@@ -137,7 +137,7 @@ function Runner(socket, playerId, initialState) {
       e.preventDefault()
       setDispatching(null)
       if (selectedTile) {
-        const baseIndex = game.getBaseIndexAt(selectedTile)
+        const baseIndex = game.getBaseIndexAt(selectedTile, false)
         // Assuming 1 boat per base for now
         const boatIndex = 0 // game.getUndispatchedBoatIndex(baseIndex)
         if (baseIndex >= 0 && boatIndex >= 0) {
@@ -181,9 +181,10 @@ function Runner(socket, playerId, initialState) {
         .append(playerNameNode(tile.baseOwner))
     }
 
-    const baseIndex = game.getBaseIndexAt(selectedTile)
+    const baseIndex = game.getBaseIndexAt(selectedTile, true)
+    $('#build-base').toggle(!!selectedTile && tile.clazz == 'coast' && !tile.hasBase && baseIndex < 0)
     $('#build-base').toggleClass('disabled', !!selectedTile && !game.canBuildBase(game.playerId, selectedTile.x, selectedTile.y))
-    $('#build-base').toggle(!!selectedTile && tile.clazz == 'coast' && !tile.hasBase)
+    $('#cancel-build-base').toggle(!!selectedTile && baseIndex >= 0 && !!game.getPlayer(playerId).bases[baseIndex].isNew)
     $('#base-controls').toggle(baseIndex >= 0)
     $('#boats').empty()
     if (baseIndex >= 0) {
@@ -211,6 +212,15 @@ function Runner(socket, playerId, initialState) {
       return
     }
     game.buildBase(selectedTile.x, selectedTile.y)
+    updateAll()
+  })
+
+  $('#cancel-build-base').click(function (e) {
+    e.preventDefault()
+    if ($(this).hasClass('disabled')) {
+      return
+    }
+    game.cancelBase(selectedTile.x, selectedTile.y)
     updateAll()
   })
 

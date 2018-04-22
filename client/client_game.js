@@ -30,6 +30,21 @@ class ClientGame extends BaseGame {
     return true
   }
 
+  cancelBase(x, y) {
+    for (const i in this.commandQueue) {
+      const c = this.commandQueue[i]
+      if (c.type == 'buildBase' && c.x == x && c.y == y) {
+        this.commandQueue.splice(i, 1)
+        const me = this.me()
+        me.bases = me.bases.filter(function (base) {
+          return base.x != x || base.y != y
+        })
+        this.me().cash += state.baseCost
+        break
+      }
+    }
+  }
+
   dispatchBoat(baseIndex, boatIndex, x, y) {
     if (!this.canDispatchBoat(this.playerId, baseIndex, boatIndex, x, y)) {
       return false
@@ -92,14 +107,14 @@ class ClientGame extends BaseGame {
     return (player && player.color) || '#000'
   }
 
-  getBaseIndexAt(selectedTile) {
+  getBaseIndexAt(selectedTile, allowNew) {
     if (!selectedTile) {
       return -1
     }
     const player = this.me()
     for (let i = 0; i < player.bases.length; i++) {
       const base = player.bases[i]
-      if (!base.isNew && base.x == selectedTile.x && base.y == selectedTile.y) {
+      if ((!base.isNew || allowNew) && base.x == selectedTile.x && base.y == selectedTile.y) {
         return i
       }
     }
