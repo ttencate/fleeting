@@ -182,6 +182,10 @@ function Runner(socket, playerId, initialState) {
       const clazz = tile.clazz
       tileInfo[0].className = `tile-${clazz}`
       tileCoords.text(`Tile ${xName}${yName}: ${clazz}`)
+
+      if (tile.clazz == 'water') {
+        $('#tile-fish').text(tile.fish)
+      }
     }
 
     $('#base-details').empty()

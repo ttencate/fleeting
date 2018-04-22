@@ -48,6 +48,16 @@ a {
   color: inherit;
 }
 
+ol, ol > li {
+  margin: 0;
+  margin-left: 2rem;
+  padding: 0;
+}
+
+.smallish {
+  font-size: 60%;
+}
+
 .overlay {
   position: absolute;
   left: 0;
@@ -240,5 +250,9 @@ a {
 }
 
 .tile-coast .coast-controls {
+  display: block;
+}
+
+.tile-water .water-controls {
   display: block;
 }
