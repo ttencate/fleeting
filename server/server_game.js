@@ -36,11 +36,12 @@ const TIPS = {
   2: 'Select your base, then dispatch your fleet to a nearby tile.',
   3: `Each fish you catch gives you \$${CASH_PER_FISH} in revenue.`,
   4: 'Maybe you can build another base already?',
+  5: 'Tip: the world is round.',
   6: 'Pro tip: you can click a base, then right-click to dispatch.',
-  8: 'Each year, fish spawn, migrate and die.',
-  10: `There must be at least ${SPAWN_COUNT} fish in a tile for them to reproduce.`,
-  12: `Each fish has a ${MIGRATE_PERCENT}% chance of migrating to a neighbouring tile.`,
-  14: `Each fish has a ${DEATH_PERCENT}% chance of dying each year.`,
+  7: 'Each year, fish spawn, migrate and die.',
+  8: `There must be at least ${SPAWN_COUNT} fish in a tile for them to reproduce.`,
+  9: `Each fish has a ${MIGRATE_PERCENT}% chance of migrating to a neighbouring tile.`,
+  10: `Each fish has a ${DEATH_PERCENT}% chance of dying each year.`,
 }
 
 module.exports = class ServerGame extends BaseGame {
@@ -85,7 +86,7 @@ module.exports = class ServerGame extends BaseGame {
         commands: [],
         done: false,
       }
-      this.gameMessage(`${playerName} has joined`)
+      this.gameMessage('action', `${playerId} joined the game`)
     }
 
     socket.emit('state', this.clientState(playerId))
@@ -142,11 +143,11 @@ module.exports = class ServerGame extends BaseGame {
     this.updateTotalFish()
 
     this.state.year++
-    this.gameMessage(`Year ${this.state.year} has begun, with ${this.state.totalFish} fish`)
+    this.gameMessage('game', `Year ${this.state.year} has begun, with ${this.state.totalFish} fish`)
 
     const tip = TIPS[this.state.year]
     if (tip) {
-      this.gameMessage(tip)
+      this.gameMessage('tip', tip)
     }
 
     this.sendState()
@@ -179,9 +180,9 @@ module.exports = class ServerGame extends BaseGame {
       const bs = newBases[key]
       const players = []
       for (let b of bs) {
-        players.push(this.state.players[b.playerId].name)
+        players.push(b.playerId)
       }
-      this.gameMessage(`${players.join(' and ')} built bases on the same spot; these were placed randomly instead`)
+      this.gameMessage('action', `${players.join(' and ')} built bases on the same spot; these were placed randomly instead`)
       for (let b of bs) {
         // TODO give up eventually and NOT build base
         for (var i = 0; i < 100; i++) {
@@ -217,7 +218,7 @@ module.exports = class ServerGame extends BaseGame {
     tile.hasBase = true
     tile.baseOwner = playerId
     player.cash -= BASE_COST
-    this.gameMessage(`${player.name} built a new base`)
+    this.gameMessage('action', `${playerId} built a new base`)
 
     this.buyBoat(playerId, player.bases.length - 1, true)
   }
@@ -360,11 +361,11 @@ module.exports = class ServerGame extends BaseGame {
   }
 
   chat(playerId, message) {
-    this.addChat({ playerId, message })
+    this.addChat({ type: 'chat', playerId, message })
   }
 
-  gameMessage(message) {
-    this.addChat({ game: true, message })
+  gameMessage(type, message) {
+    this.addChat({ type, message })
   }
 
   addChat(chat) {

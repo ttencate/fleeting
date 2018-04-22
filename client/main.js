@@ -38,9 +38,35 @@ function Runner(socket, playerId, initialState) {
   const chatLog = $('#chat-log')
   this.chat = function (chat) {
     let node
-    if (chat.game) {
-      node = $('<div class="game-message">').text('\u2b9e ' + chat.message)
-    } else {
+    if (chat.type == 'game') {
+      node = $('<div class="game-message">').text(chat.message)
+    } else if (chat.type == 'tip') {
+      node = $('<div>').text('\u2192 ' + chat.message)
+    } else if (chat.type == 'action') {
+      // Replace player IDs by names. Gruesome.
+      let remaining = chat.message
+      node = $('<div>')
+      while (true) {
+        let start = remaining.length
+        let length = -1
+        let playerId = null
+        for (const pid in game.state.players) {
+          const i = remaining.indexOf(pid)
+          if (i >= 0 && i < start) {
+            start = i
+            length = pid.length
+            playerId = pid
+          }
+        }
+        if (!playerId) {
+          node.append($('<span>').text(remaining))
+          break
+        }
+        node.append($('<span>').text(remaining.substring(0, start)))
+        node.append(playerNameNode(playerId))
+        remaining = remaining.substring(start + length)
+      }
+    } else { // 'chat'
       node = $('<div>')
         .append(playerNameNode(chat.playerId))
         .append(': ')
