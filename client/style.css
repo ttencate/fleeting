@@ -9,7 +9,7 @@ html, body {
   font-family: Montserrat, Helvetica, Arial, sans-serif;
   font-size: 1vw;
   line-height: 1.5;
-  background-color: #224;
+  background-color: #000051; /* Indigo 900 Dark */
 }
 
 main {
@@ -17,19 +17,19 @@ main {
   width: 100rem;
   height: 56.25rem;
   margin: 0 auto;
-  background-color: #dde;
+  background-color: #e8eaf6; /* Indigo 50 */
   font-size: 2rem;
 }
 
 footer {
   margin: 2rem 0;
   text-align: center;
-  color: #779;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 h1 {
   text-align: center;
-  color: #27c;
+  color: #0288d1;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   margin: 0 0 5rem;
 }
@@ -39,7 +39,7 @@ h1 {
 }
 
 p {
-  color: #234;
+  color: #002f6c;
   text-align: center;
   margin: 0 0 2rem;
 }
@@ -66,16 +66,12 @@ a {
 }
 
 .darkened h1 {
-  color: #c72;
+  color: #b3e5fc;
 }
 
 .darkened p,
 .connecting p {
   color: #fff;
-}
-
-#share-link-box {
-  background-color: #fdc;
 }
 
 .lightened {
@@ -85,31 +81,32 @@ a {
 
 .connecting {
   color: #fff;
-  background-color: #224;
+  background-color: #1a237e;
 }
 
 .button {
   display: inline-block;
-  background-color: #27c;
+  background-color: #0288d1;
   color: #fff;
   height: 5rem;
   line-height: 5rem;
   padding: 0 2rem;
   text-decoration: none;
   cursor: pointer;
+  border-radius: 2rem;
 }
 
 .button:hover,
 .button:focus {
-  background-color: #49e;
+  background-color: #03a9f4;
 }
 
 .button:active {
-  background-color: #05a;
+  background-color: #0277bd;
 }
 
 .button.disabled {
-  background-color: #aaa;
+  background-color: #616161;
   cursor: default;
 }
 
@@ -118,7 +115,7 @@ a {
 }
 
 .padded {
-  padding: 0.5rem;
+  padding: 1rem;
 }
 
 .center {
@@ -144,7 +141,9 @@ a {
 }
 
 .status {
-  background: #fff;
+  background-color: #eceff1;
+  box-shadow: 0 0 8px #000;
+  z-index: 1;
 }
 
 .dense {
@@ -156,22 +155,34 @@ a {
 }
 
 .mapbox {
-  background: #fff;
+  background-color: #455a64;
   width: 70rem;
   height: 35rem;
 }
 
 .controls {
-  background: #ffe;
+  background-color: #eceff1;
 }
 
 #map {
   display: block;
-  background-color: #567;
+}
+
+#share-link-box {
+  background-color: #0288d1;
+  color: #fff;
+}
+
+#share-link {
+  font-size: 58%;
+  display: inline-block;
+  padding: 0.2em 0.4em;
+  background-color: #fff;
+  color: #222;
 }
 
 .rankings {
-  background-color: #ddd;
+  background-color: #eceff1;
 }
 
 .player-ranking {
@@ -201,7 +212,7 @@ a {
 }
 
 .chat {
-  background: #eff;
+  background-color: #cfd8dc;
 }
 
 .chat-log {

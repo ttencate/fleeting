@@ -68,10 +68,10 @@ class Renderer {
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 
     const colors = {
-      ice: '#f8f8ff',
-      grass: '#6d4',
-      desert: '#eb5',
-      water: '#37d'
+      ice: '#eceff1', // Blue Grey 50
+      grass: '#aed581', // Light Green 300
+      desert: '#ffe082', // Amber 200
+      water: '#4fc3f7' // Light Blue 300
     }
     const path = (center) => {
       const w = 0.5 * this.tileWidth

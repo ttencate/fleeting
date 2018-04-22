@@ -2,14 +2,14 @@ const BaseGame = require('../shared/base_game')
 const map = require('./map')
 
 const PLAYER_COLORS = [
-  '#FF4136',
-  '#FFDC00',
-  '#B10DC9',
-  '#001f3f',
-  '#FF851B',
-  '#AAAAAA',
-  '#111111',
-  '#01FF70',
+  '#d32f2f', // Red 700
+  '#00bcd4', // Cyan 500
+  '#fdd835', // Yellow 600
+  '#9c27b0', // Purple 500
+  '#ff9800', // Orange 500
+  '#2196f3', // Blue 500
+  '#795548', // Brown 500
+  '#e91e63', // Pink 500
 ]
 const MAX_FISH_PER_TILE = 9
 const INITIAL_CASH = 10
@@ -70,7 +70,8 @@ module.exports = class ServerGame extends BaseGame {
   }
 
   join(playerId, playerName, socket) {
-    if (!this.state.players[playerId]) {
+    let isNew = !this.state.players[playerId]
+    if (isNew) {
       if (this.state.year > 1) {
         return false
       }
@@ -85,7 +86,6 @@ module.exports = class ServerGame extends BaseGame {
         done: false,
         host: Object.keys(this.state.players).length == 0
       }
-      this.gameMessage('action', `${playerId} joined the game`)
     }
 
     this.sockets[playerId] = socket
@@ -100,6 +100,10 @@ module.exports = class ServerGame extends BaseGame {
     })
 
     this.sendState()
+
+    if (isNew) {
+      this.gameMessage('action', `${playerId} joined the game`)
+    }
 
     return true
   }
