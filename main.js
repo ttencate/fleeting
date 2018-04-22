@@ -42,7 +42,7 @@ app.get('/index.js', sendFile('client/index.js'))
 app.get('/base_game.js', sendFile('shared/base_game.js'))
 app.get('/client_game.js', sendFile('client/client_game.js'))
 app.get('/renderer.js', sendFile('client/renderer.js'))
-app.get('/game.js', sendFile('client/game.js'))
+app.get('/main.js', sendFile('client/main.js'))
 app.get('/style.css', sendFile('client/style.css'))
 
 io.on('connection', function (socket) {

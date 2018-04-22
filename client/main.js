@@ -127,16 +127,16 @@ function Runner(socket, playerId, initialState) {
       const boats = state.players[playerId].bases[baseIndex].boats
       boats.forEach(function (boat, i) {
         const node = $('<div>')
-          .append(`Boat ${i + 1}`)
+          // .append(`Boat ${i + 1}`)
           .append($('<a class="button dispatch-boat">')
-            .text('Dispatch')
+            .text('Dispatch fleet')
             .toggleClass('disabled', !!boat.dispatched)
             .attr('data-base-index', baseIndex)
             .attr('data-boat-index', i))
         $('#boats').append(node)
       })
     }
-    $('#buy-boat').toggleClass('disabled', state.players[playerId].cash < state.boatCost)
+    // $('#buy-boat').toggleClass('disabled', state.players[playerId].cash < state.boatCost)
 
     $('#end-turn').toggleClass('disabled', !!state.players[playerId].done)
   }
