@@ -114,6 +114,15 @@ function Runner(socket, playerId, initialState) {
     $('#base-cost').text(game.state.baseCost)
     $('#boat-cost').text(game.state.boatCost)
 
+    if (game.state.winner) {
+      $('#winner').empty().append(playerNameNode(game.state.winner))
+      $('#win-overlay').removeClass('cloaked')
+    }
+
+    if (game.state.lost) {
+      $('#lose-overlay').removeClass('cloaked')
+    }
+
     renderer.render()
     updateControls()
     updateRankings()
@@ -209,6 +218,8 @@ function Runner(socket, playerId, initialState) {
     // $('#buy-boat').toggleClass('disabled', game.me().cash < state.boatCost)
 
     $('#end-turn').toggleClass('disabled', !!game.me().done)
+    $('#end-turn')
+      .text(game.me().host && game.state.year == 1 ? '\u2713 Start game' : '\u2713 End turn')
   }
 
   $('#build-base').click(function (e) {
@@ -254,6 +265,11 @@ function Runner(socket, playerId, initialState) {
       window.alert('You should really build a base before ending your turn! Click a coastal tile, then click the "Build base" button.')
       return
     }
+    if (game.me().host && game.state.year == 1) {
+      if (!window.confirm('Nobody will be able to join after the game has been started. Start the game now?')) {
+        return
+      }
+    }
     setDispatching(null)
     socket.emit('commands', game.commandQueue)
     game.commandQueue = []
@@ -288,10 +304,14 @@ $(function () {
   socket.on('state', function (state) {
     if (!runner) {
       runner = new Runner(socket, playerId, state)
-      $('.connecting').hide()
+      $('#connecting').hide()
     } else {
       runner.setState(state)
     }
+  })
+  socket.on('alreadyStarted', function () {
+    $('#connecting').hide()
+    $('#already-started').removeClass('cloaked')
   })
   socket.on('chat', function (chat) {
     if (runner) {

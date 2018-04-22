@@ -70,13 +70,11 @@ module.exports = class ServerGame extends BaseGame {
   }
 
   join(playerId, playerName, socket) {
-    this.sockets[playerId] = socket
-
-    socket.on('chat', (message) => this.chat(playerId, message))
-    socket.on('commands', (commands) => this.commands(playerId, commands))
-    socket.on('disconnect', () => this.disconnect(playerId, socket))
-
     if (!this.state.players[playerId]) {
+      if (this.state.year > 1) {
+        return false
+      }
+
       this.state.players[playerId] = {
         id: playerId,
         name: playerName,
@@ -85,9 +83,16 @@ module.exports = class ServerGame extends BaseGame {
         bases: [],
         commands: [],
         done: false,
+        host: Object.keys(this.state.players).length == 0
       }
       this.gameMessage('action', `${playerId} joined the game`)
     }
+
+    this.sockets[playerId] = socket
+
+    socket.on('chat', (message) => this.chat(playerId, message))
+    socket.on('commands', (commands) => this.commands(playerId, commands))
+    socket.on('disconnect', () => this.disconnect(playerId, socket))
 
     socket.emit('state', this.clientState(playerId))
     this.state.chats.forEach((chat) => {
@@ -95,9 +100,15 @@ module.exports = class ServerGame extends BaseGame {
     })
 
     this.sendState()
+
+    return true
   }
 
   commands(playerId, commands) {
+    if (this.state.over) {
+      return
+    }
+
     this.state.players[playerId].commands = commands
     this.state.players[playerId].done = true
 
@@ -148,6 +159,17 @@ module.exports = class ServerGame extends BaseGame {
     const tip = TIPS[this.state.year]
     if (tip) {
       this.gameMessage('tip', tip)
+    }
+
+    if (this.state.totalFish < LOSE_BELOW_TOTAL_FISH) {
+      this.state.lost = true
+      this.state.over = true
+    } else {
+      const players = this.getRankedPlayers()
+      if (players[0] && players[0].cash > this.winCash()) {
+        this.state.winner = players[0].id
+        this.state.over = true
+      }
     }
 
     this.sendState()
@@ -369,6 +391,21 @@ module.exports = class ServerGame extends BaseGame {
 
   chat(playerId, message) {
     this.addChat({ type: 'chat', playerId, message })
+    if (message == 'moneymoneymoney') {
+      this.getPlayer(playerId).cash += 1000
+      this.sendState()
+    } else if (message == 'killkillkill') {
+      for (var y = 0; y < this.state.ny; y++) {
+        for (var x = 0; x < this.state.nx; x++) {
+          const tile = this.state.grid[y][x]
+          if (typeof tile.fish == 'number') {
+            tile.fish = Math.min(1, tile.fish)
+          }
+        }
+      }
+      this.updateTotalFish()
+      this.sendState()
+    }
   }
 
   gameMessage(type, message) {
@@ -437,6 +474,9 @@ module.exports = class ServerGame extends BaseGame {
 
     return {
       players,
+      over: state.over,
+      lost: state.lost,
+      winner: state.winner,
       year: state.year,
       nx: state.nx,
       ny: state.ny,

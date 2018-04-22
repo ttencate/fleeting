@@ -34,6 +34,10 @@ h1 {
   margin: 0 0 5rem;
 }
 
+.much-after {
+  margin: 0 20rem 5rem;
+}
+
 p {
   color: #234;
   text-align: center;
@@ -44,7 +48,7 @@ a {
   color: inherit;
 }
 
-.connecting {
+.overlay {
   position: absolute;
   left: 0;
   top: 0;
@@ -54,6 +58,28 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.darkened {
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.darkened h1 {
+  color: #c72;
+}
+
+.darkened p,
+.connecting p {
+  color: #fff;
+}
+
+.lightened {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.connecting {
   color: #fff;
   background-color: #224;
 }
@@ -188,10 +214,6 @@ a {
   display: block;
   font-size: inherit;
   width: 100%;
-}
-
-.cloaked {
-  display: none;
 }
 
 .tile-none .tile-coords {

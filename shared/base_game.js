@@ -67,6 +67,17 @@ class BaseGame {
     }
     return neighs
   }
+
+  getRankedPlayers() {
+    const players = Object.values(this.state.players)
+    players.sort(function (a, b) {
+      if (a.cash == b.cash) {
+        return a.playerId < b.playerId ? -1 : a.playerId > b.playerId ? 1 : 0
+      }
+      return b.cash - a.cash
+    })
+    return players
+  }
 }
 
 if (typeof module != 'undefined') {

@@ -5,6 +5,9 @@
     <title>Fleeting: A Game Of Fish</title>
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,600">
     <link rel="stylesheet" href="/style.css">
+    <style>
+      .cloaked { display: none; }
+    </style>
   </head>
   <body>
     <main class="rows">
@@ -23,7 +26,7 @@
               Number of fish in the ocean: <strong id="num-fish"></strong>
             </div>
             <div class="row small">
-              If this gets below <strong id="lose-fish"></strong>, everybody loses
+              If this drops below <strong id="lose-fish"></strong>, everybody loses
             </div>
           </div>
           <div class="right">
@@ -83,8 +86,44 @@
           </div>
         </div>
       </div>
-      <div class="connecting">
-        <div>Connecting…</div>
+      <div id="connecting" class="overlay connecting">
+        <p>Connecting…</p>
+      </div>
+      <div id="already-started" class="cloaked overlay connecting">
+        <div>
+          <p class="much-after">
+            This game has already started, so you cannot join anymore. Too bad!
+          </p>
+          <p>
+            <a href="/" class="button">Back to lobby</a>
+          </p>
+        </div>
+      </div>
+      <div id="lose-overlay" class="cloaked overlay darkened">
+        <div>
+          <h1>
+            The ocean is dying&hellip;
+          </h1>
+          <p class="much-after">
+            Not enough fish survived your reckless overfishing, and now there are too few left to replenish the stocks. <strong>You all lose.</strong>
+          </p>
+          <p>
+            <a href="/" class="button">Back to lobby</a>
+          </p>
+        </div>
+      </div>
+      <div id="win-overlay" class="cloaked overlay lightened">
+        <div>
+          <h1>
+            We have a winner!
+          </h1>
+          <p class="much-after">
+            <span id="winner"></span> was most successful in extracting wealth from the oceans without exhausting it. <strong>They have won the game!</strong></strong>
+          </p>
+          <p>
+            <a href="/" class="button">Back to lobby</a>
+          </p>
+        </div>
       </div>
     </main>
     <footer>

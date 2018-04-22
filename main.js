@@ -72,7 +72,9 @@ async function main() {
         }
 
         socket.join(gameId)
-        game.join(playerId, playerName, socket)
+        if (!game.join(playerId, playerName, socket)) {
+          socket.emit('alreadyStarted')
+        }
 
         socket.on('rename', function (newName) {
           playerName = newName
