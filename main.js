@@ -9,7 +9,7 @@ const storage = require('./server/storage')
 
 const HOST = 'localhost'
 const PORT = 3001
-const DATABASE_PATH = path.resolve(__dirname, 'data.sqlite')
+const DATABASE_PATH = path.resolve(__dirname, 'data/data.sqlite')
 
 function renderTemplate(template, context, res) {
   context.browserRefreshUrl = process.env.BROWSER_REFRESH_URL

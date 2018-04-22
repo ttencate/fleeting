@@ -258,7 +258,6 @@ module.exports = class ServerGame extends BaseGame {
       }
     }
 
-    console.log(dispatches)
     for (const list of Object.values(dispatches)) {
       let totalCapacity = 0
       let x
