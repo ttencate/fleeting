@@ -121,12 +121,14 @@ function Runner(socket, playerId, initialState) {
 
   // mousedown gets right click, click does not.
   canvas.mousedown(function (e) {
+    e.preventDefault()
+    const done = game.me().done
+
     const offset = $(this).offset()
     const coords = renderer.getTileCoords(e.pageX - offset.left, e.clientY - offset.top)
 
     if (e.which == 1) { // Left
-      e.preventDefault()
-      if (dispatching) {
+      if (dispatching && !done) {
         game.dispatchBoat(dispatching.baseIndex, dispatching.boatIndex, coords.x, coords.y)
         setDispatching(null)
         updateAll()
@@ -134,9 +136,8 @@ function Runner(socket, playerId, initialState) {
         selectTile(coords)
       }
     } else if (e.which == 3) { // Right
-      e.preventDefault()
       setDispatching(null)
-      if (selectedTile) {
+      if (selectedTile && !done) {
         const baseIndex = game.getBaseIndexAt(selectedTile, false)
         // Assuming 1 boat per base for now
         const boatIndex = 0 // game.getUndispatchedBoatIndex(baseIndex)
@@ -181,10 +182,13 @@ function Runner(socket, playerId, initialState) {
         .append(playerNameNode(tile.baseOwner))
     }
 
+    const me = game.me()
     const baseIndex = game.getBaseIndexAt(selectedTile, true)
+    const base = me.bases[baseIndex]
     $('#build-base').toggle(!!selectedTile && tile.clazz == 'coast' && !tile.hasBase && baseIndex < 0)
-    $('#build-base').toggleClass('disabled', !!selectedTile && !game.canBuildBase(game.playerId, selectedTile.x, selectedTile.y))
-    $('#cancel-build-base').toggle(!!selectedTile && baseIndex >= 0 && !!game.getPlayer(playerId).bases[baseIndex].isNew)
+    $('#build-base').toggleClass('disabled', !!me.done && !!selectedTile && !game.canBuildBase(game.playerId, selectedTile.x, selectedTile.y))
+    $('#cancel-build-base').toggle(!!selectedTile && baseIndex >= 0 && !!base && !!base.isNew)
+    $('#cancel-build-base').toggleClass('disabled', !!me.done)
     $('#base-controls').toggle(baseIndex >= 0)
     $('#boats').empty()
     if (baseIndex >= 0) {
@@ -196,6 +200,7 @@ function Runner(socket, playerId, initialState) {
             .text(
               dispatching ? 'Cancel dispatch' :
               boat.dispatched ? 'Change dispatch' : 'Dispatch fleet')
+            .toggleClass('disabled', !!me.done)
             .attr('data-base-index', baseIndex)
             .attr('data-boat-index', i))
         $('#boats').append(node)
@@ -242,10 +247,14 @@ function Runner(socket, playerId, initialState) {
 
   $('#end-turn').click(function (e) {
     e.preventDefault()
+    if ($(this).hasClass('disabled')) {
+      return
+    }
     if (!game.hasBase()) {
       window.alert('You should really build a base before ending your turn! Click a coastal tile, then click the "Build base" button.')
       return
     }
+    setDispatching(null)
     socket.emit('commands', game.commandQueue)
     game.commandQueue = []
     game.me().done = true
