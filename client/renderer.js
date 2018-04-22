@@ -3,6 +3,7 @@ class Renderer {
     this.game = game
     this.canvas = canvas
     this.selectedTile = null
+    this.dispatching = null
   }
 
   resize(width, height) {
@@ -60,6 +61,7 @@ class Renderer {
     const nx = state.nx
     const ny = state.ny
     const grid = state.grid
+    const dispatching = this.dispatching
 
     const ctx = this.canvas[0].getContext('2d')
 
@@ -91,6 +93,12 @@ class Renderer {
         ctx.fillStyle = colors[type]
         path(this.tileCenter(x, y))
         ctx.fill()
+
+        // Dispatch range
+        if (dispatching && !this.game.canDispatchBoat(this.game.playerId, dispatching.baseIndex, dispatching.boatIndex, x, y)) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctx.fill()
+        }
       }
     }
 

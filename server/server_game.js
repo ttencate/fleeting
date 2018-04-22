@@ -202,6 +202,10 @@ module.exports = class ServerGame extends BaseGame {
       }
       for (const command of player.commands) {
         if (command.type == 'dispatchBoat') {
+          if (!this.canDispatchBoat(playerId, command.baseIndex, command.boatIndex, command.x, command.y)) {
+            console.log(`${playerId} cannot dispatch boat to ${command.x}, ${command.y}`)
+            continue
+          }
           const boat = player.bases[command.baseIndex].boats[command.boatIndex]
           const tile = this.state.grid[command.y][command.x]
           const fishCaught = Math.min(tile.fish, boat.capacity)

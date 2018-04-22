@@ -9,8 +9,7 @@ function Runner(socket, playerId, initialState) {
   let tileWidth
   let tileHeight
   let selectedTile = null
-  let dispatchingBaseIndex = -1
-  let dispatchingBoatIndex = -1
+  let dispatching = null
 
   const game = new ClientGame(playerId, initialState)
   const renderer = new Renderer(game, canvas)
@@ -25,6 +24,12 @@ function Runner(socket, playerId, initialState) {
       .text(game.getPlayerName(playerId))
       .css({ color: game.getPlayerColor(playerId) })
       .toggleClass('my-player-name', playerId == game.playerId)
+  }
+
+  function setDispatching(d) {
+    dispatching = d
+    renderer.dispatching = d
+    renderer.render()
   }
 
   $(window).on('resize', onResize)
@@ -93,18 +98,16 @@ function Runner(socket, playerId, initialState) {
 
     if (e.which == 1) { // Left
       e.preventDefault()
-      if (dispatchingBaseIndex >= 0 && dispatchingBoatIndex >= 0) {
-        game.dispatchBoat(dispatchingBaseIndex, dispatchingBoatIndex, coords.x, coords.y)
-        dispatchingBaseIndex = -1
-        dispatchingBoatIndex = -1
+      if (dispatching) {
+        game.dispatchBoat(dispatching.baseIndex, dispatching.boatIndex, coords.x, coords.y)
+        setDispatching(null)
         updateAll()
       } else {
         selectTile(coords)
       }
     } else if (e.which == 3) { // Right
       e.preventDefault()
-      dispatchingBaseIndex = -1
-      dispatchingBoatIndex = -1
+      setDispatching(null)
       if (selectedTile) {
         const baseIndex = game.getBaseIndexAt(selectedTile)
         const boatIndex = game.getUndispatchedBoatIndex(baseIndex)
@@ -121,8 +124,7 @@ function Runner(socket, playerId, initialState) {
   function selectTile(coords) {
     selectedTile = coords
     renderer.selectedTile = coords
-    dispatchingBaseIndex = -1
-    dispatchingBoatIndex = -1
+    setDispatching(null)
 
     renderer.render()
     updateControls()
@@ -187,8 +189,10 @@ function Runner(socket, playerId, initialState) {
     if ($(this).hasClass('disabled')) {
       return
     }
-    dispatchingBaseIndex = $(this).attr('data-base-index')
-    dispatchingBoatIndex = $(this).attr('data-boat-index')
+    setDispatching({
+      baseIndex: parseInt($(this).attr('data-base-index')),
+      boatIndex: parseInt($(this).attr('data-boat-index'))
+    })
   })
 
   $('#end-turn').click(function (e) {
