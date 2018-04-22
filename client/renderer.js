@@ -196,6 +196,41 @@ class Renderer {
             ctx.lineWidth = 2
             ctx.strokeStyle = 'black'
             ctx.stroke()
+
+            const basePos = this.tileCenter(base.x, base.y)
+            const boatPos = this.tileCenter(boat.x, boat.y)
+            const dx = boatPos.x - basePos.x
+            const dy = boatPos.y - basePos.y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            const angle = Math.atan2(dy, dx)
+            ctx.save()
+            ctx.translate(basePos.x, basePos.y)
+            ctx.rotate(angle)
+            const shorten = 0.3 * this.tileWidth
+            const headSize = 0.2 * this.tileWidth
+            const arrowPath = () => {
+              ctx.beginPath()
+              ctx.moveTo(shorten, 0)
+              ctx.lineTo(dist - shorten, 0)
+              ctx.stroke()
+              ctx.beginPath()
+              ctx.moveTo(dist - shorten, 0)
+              ctx.lineTo(dist - shorten - headSize, -0.66 * headSize)
+              ctx.stroke()
+              ctx.beginPath()
+              ctx.moveTo(dist - shorten, 0)
+              ctx.lineTo(dist - shorten - headSize, 0.66 * headSize)
+              ctx.stroke()
+            }
+            ctx.lineWidth = 3
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)'
+            ctx.lineCap = 'round'
+            arrowPath()
+            ctx.lineWidth = 1
+            ctx.strokeStyle = player.color
+            ctx.lineCap = 'butt'
+            arrowPath()
+            ctx.restore()
           }
         })
       })
