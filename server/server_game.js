@@ -140,7 +140,7 @@ module.exports = class ServerGame extends BaseGame {
         for (var i = 0; i < 100; i++) {
           const x = Math.floor(this.state.nx * Math.random())
           const y = Math.floor(this.state.ny * Math.random())
-          if (this.canBuildBaseAt(x, y)) {
+          if (this.canBuildBase(playerId, x, y)) {
             b.command.x = x
             b.command.y = y
             break
@@ -156,7 +156,7 @@ module.exports = class ServerGame extends BaseGame {
       console.log(`${playerId} does not have enough cash to build a base`)
       return
     }
-    if (!this.canBuildBaseAt(command.x, command.y)) {
+    if (!this.canBuildBase(playerId, command.x, command.y)) {
       console.log(`Cannot build base at ${JSON.stringify(command)}`)
       return
     }

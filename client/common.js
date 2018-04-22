@@ -1,3 +1,17 @@
+function askPlayerName(defaultName) {
+  defaultName = defaultName || window.localStorage.playerName
+  const name = window.prompt("What is your name?", defaultName) || defaultName
+  window.localStorage.playerName = name
+  return name
+}
+
+function getPlayerName() {
+  if (!window.localStorage.playerName) {
+    askPlayerName('Anonymous' + Math.floor(Math.random() * 1000))
+  }
+  return window.localStorage.playerName
+}
+
 $(function () {
   $(window).on('resize', function () {
     var w = window.innerWidth;

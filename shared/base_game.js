@@ -3,9 +3,26 @@ class BaseGame {
     this.state = state
   }
 
-  canBuildBaseAt(x, y) {
+  getPlayer(playerId) {
+    return this.state.players[playerId]
+  }
+
+  canBuildBase(playerId, x, y) {
+    if (this.getPlayer(playerId).cash < this.state.baseCost) {
+      return false
+    }
     const tile = this.state.grid[y][x]
     return tile.clazz == 'coast' && !tile.hasBase
+  }
+
+  canDispatchBoat(playerId, baseIndex, boatIndex, x, y) {
+    if (baseIndex < 0 || boatIndex < 0) {
+      return false
+    }
+    if (state.grid[y][x].clazz != 'water') {
+      return false
+    }
+    return true
   }
 
   neighbors(x, y) {
@@ -18,6 +35,6 @@ class BaseGame {
   }
 }
 
-if (module) {
+if (typeof module != 'undefined') {
   module.exports = BaseGame
 }

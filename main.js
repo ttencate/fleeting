@@ -22,6 +22,12 @@ function renderTemplate(template, context, res) {
   res.send(page)
 }
 
+function sendFile(file) {
+  return function (req, res) {
+    res.sendFile(path.resolve(__dirname, file))
+  }
+}
+
 app.get('/', function (req, res) {
   renderTemplate('client/index.html', {}, res)
 })
@@ -31,21 +37,13 @@ app.get(/^\/(\d+)$/, function (req, res) {
   renderTemplate('client/game.html', { gameId }, res)
 })
 
-app.get('/common.js', function (req, res) {
-  res.sendFile(path.resolve(__dirname, 'client/common.js'))
-})
-
-app.get('/index.js', function (req, res) {
-  res.sendFile(path.resolve(__dirname, 'client/index.js'))
-})
-
-app.get('/game.js', function (req, res) {
-  res.sendFile(path.resolve(__dirname, 'client/game.js'))
-})
-
-app.get('/style.css', function (req, res) {
-  res.sendFile(path.resolve(__dirname, 'client/style.css'))
-})
+app.get('/common.js', sendFile('client/common.js'))
+app.get('/index.js', sendFile('client/index.js'))
+app.get('/base_game.js', sendFile('shared/base_game.js'))
+app.get('/client_game.js', sendFile('client/client_game.js'))
+app.get('/renderer.js', sendFile('client/renderer.js'))
+app.get('/game.js', sendFile('client/game.js'))
+app.get('/style.css', sendFile('client/style.css'))
 
 io.on('connection', function (socket) {
   console.log('connect:', socket.id)
