@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.0" orientation="hexagonal" renderorder="right-down" width="20" height="11" tilewidth="52" tileheight="60" infinite="0" hexsidelength="30" staggeraxis="y" staggerindex="odd" nextobjectid="5">
+ <tileset firstgid="1" name="worldmap" tilewidth="2058" tileheight="1036" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="3">
+   <image width="2058" height="1036" source="mollweide.jpg"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="5" name="tiles" tilewidth="52" tileheight="60" tilecount="3" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="52" height="60" source="ice.png"/>
+  </tile>
+  <tile id="1">
+   <image width="52" height="60" source="land.png"/>
+  </tile>
+  <tile id="2">
+   <image width="52" height="60" source="ocean.png"/>
+  </tile>
+ </tileset>
+ <objectgroup name="Object Layer 1" locked="1">
+  <object id="4" gid="4" x="28" y="497" width="985.743" height="483"/>
+ </objectgroup>
+ <layer name="Tile Layer 1" width="20" height="11" opacity="0.5">
+  <data encoding="csv">
+0,0,0,0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,
+0,0,0,6,6,6,6,6,7,7,6,6,6,6,6,6,0,0,0,0,
+0,0,7,7,6,6,6,7,7,7,6,6,6,6,6,6,7,7,0,0,
+0,7,7,7,6,6,7,7,7,6,6,6,6,6,6,7,7,7,0,0,
+0,7,7,7,7,6,7,7,7,6,6,6,6,7,6,6,7,7,7,0,
+7,7,7,7,7,6,6,7,7,6,6,6,7,7,6,7,7,7,7,0,
+0,7,7,7,7,7,6,6,7,7,6,6,7,7,7,7,6,6,7,0,
+0,7,7,7,7,7,6,7,7,7,6,7,7,7,7,6,6,7,0,0,
+0,0,7,7,7,7,7,6,7,7,7,7,7,7,7,7,7,7,0,0,
+0,0,0,7,7,7,7,7,7,7,7,7,7,7,7,7,0,0,0,0,
+0,0,0,0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0
+</data>
+ </layer>
+</map>

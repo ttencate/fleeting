@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.0" orientation="hexagonal" renderorder="right-down" width="20" height="11" tilewidth="52" tileheight="60" infinite="0" hexsidelength="30" staggeraxis="y" staggerindex="odd" nextobjectid="4">
+ <tileset firstgid="1" name="worldmap" tilewidth="1003" tileheight="614" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="2">
+   <image width="1003" height="614" source="winkel-tripel.jpg"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="4" name="tiles" tilewidth="52" tileheight="60" tilecount="3" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="52" height="60" source="ice.png"/>
+  </tile>
+  <tile id="1">
+   <image width="52" height="60" source="land.png"/>
+  </tile>
+  <tile id="2">
+   <image width="52" height="60" source="ocean.png"/>
+  </tile>
+ </tileset>
+ <objectgroup name="Object Layer 1" visible="0" locked="1">
+  <object id="3" gid="3" x="27" y="495" width="987" height="480"/>
+ </objectgroup>
+ <layer name="Tile Layer 1" width="20" height="11" opacity="0.5">
+  <data encoding="csv">
+0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,
+0,0,0,5,5,5,5,6,6,6,5,5,5,5,5,5,0,0,0,0,
+0,0,6,6,5,5,5,6,6,6,5,5,5,5,5,5,6,6,0,0,
+0,6,6,6,5,5,6,6,6,5,5,5,5,5,5,6,6,6,0,0,
+0,6,6,6,6,5,6,6,6,5,5,5,5,6,5,5,6,6,6,0,
+6,6,6,6,6,5,5,6,6,5,5,5,6,6,6,6,6,6,6,0,
+0,6,6,6,6,6,5,5,6,6,6,5,6,6,6,6,5,5,6,0,
+0,6,6,6,6,6,5,6,6,6,5,6,6,6,6,5,5,6,0,0,
+0,0,6,6,6,6,5,6,6,6,6,6,6,6,6,6,6,6,0,0,
+0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,
+0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0
+</data>
+ </layer>
+</map>
